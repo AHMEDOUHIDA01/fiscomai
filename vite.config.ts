@@ -15,6 +15,9 @@ const crossOriginIsolation = {
 };
 
 export default defineConfig({
+  // Relative base so the build works both at the domain root (local preview,
+  // Netlify/Vercel) and under a GitHub Pages subpath (/fiscomai/).
+  base: './',
   plugins: [react(), crossOriginIsolation],
   // Keep large AI/wasm deps out of Vite's dep pre-bundling; they are loaded
   // lazily at runtime only when a feature that needs them is used.
