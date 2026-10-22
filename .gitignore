@@ -8,3 +8,5 @@ npm-debug.log*
 tsconfig.tsbuildinfo
 clipcraft-studio.bundle
 *.bundle
+clipcraft-site.zip
+*.zip
