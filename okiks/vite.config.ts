@@ -10,7 +10,9 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
-      injectManifest: { globPatterns: ["**/*.{js,css,html,svg,png,webp,woff2}"] },
+      // Les icônes 3D (public/emoji) ne sont pas pré-téléchargées : elles sont mises en cache
+      // à la première utilisation, pour que chaque mise à jour reste légère.
+      injectManifest: { globPatterns: ["**/*.{js,css,html,svg,png,woff2}"] },
       includeAssets: ["favicon.svg", "icon-192.png", "icon-512.png"],
       manifest: {
         name: "OKIKS — تعلّم الإنجليزية",

@@ -21,6 +21,12 @@ registerRoute(
   new CacheFirst({ cacheName: "fonts", plugins: [new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 31_536_000 })] }),
 );
 
+// Icônes 3D : en cache à la première utilisation (disponibles hors ligne ensuite).
+registerRoute(
+  ({ url }) => url.origin === self.location.origin && url.pathname.startsWith("/emoji/"),
+  new CacheFirst({ cacheName: "emoji-3d", plugins: [new ExpirationPlugin({ maxEntries: 400 })] }),
+);
+
 /** Lit la progression enregistrée par l'application (IndexedDB « okiks »). */
 function readState(): Promise<ProgressState | null> {
   return new Promise((resolve) => {

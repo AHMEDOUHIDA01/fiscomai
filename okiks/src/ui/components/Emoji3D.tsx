@@ -1,3 +1,4 @@
+import { useState } from "react";
 import map from "../emoji-map.json";
 
 const MAP = map as Record<string, string>;
@@ -8,7 +9,9 @@ const MAP = map as Record<string, string>;
  */
 export function E({ e, size = 28, className = "", label }: { e: string; size?: number; className?: string; label?: string }) {
   const file = MAP[e];
-  if (!file) {
+  // Hors ligne, une icône jamais affichée n'est pas encore en cache : on retombe sur l'émoji du système.
+  const [failed, setFailed] = useState(false);
+  if (!file || failed) {
     return (
       <span className={`e3d e3d--text ${className}`} style={{ fontSize: size * 0.85 }} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
         {e}
@@ -25,6 +28,7 @@ export function E({ e, size = 28, className = "", label }: { e: string; size?: n
       aria-hidden={label ? undefined : true}
       draggable={false}
       decoding="async"
+      onError={() => setFailed(true)}
     />
   );
 }

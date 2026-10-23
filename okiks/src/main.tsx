@@ -6,7 +6,17 @@ import { useApp } from "./store";
 import { createRepository } from "./storage/repository";
 import "./styles.css";
 
-registerSW({ immediate: true });
+registerSW({
+  immediate: true,
+  // Cherche une nouvelle version à chaque retour sur l'application et toutes les heures.
+  onRegisteredSW(_url, reg) {
+    if (!reg) return;
+    const check = () => void reg.update().catch(() => {});
+    document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && check());
+    setInterval(check, 60 * 60 * 1000);
+    check();
+  },
+});
 
 createRepository().then((repo) => useApp.getState().init(repo));
 
