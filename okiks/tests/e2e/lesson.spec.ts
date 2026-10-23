@@ -82,3 +82,17 @@ test("interface en arabe de droite à gauche, écrans annexes et perte de cœur"
   await expect(page.locator(".lesson__top .stat--hearts")).toContainText("4");
   await page.screenshot({ path: "test-results/wrong-ar.png" });
 });
+
+test("rappels : autorisation des notifications et réglage de l'heure", async ({ page, context }) => {
+  await context.grantPermissions(["notifications"]);
+  await onboard(page, "Français", /Adulte/);
+  await page.goto("/#/settings");
+  // L'activation attend l'autorisation et le service worker : on clique puis on attend la confirmation.
+  await page.locator("label.toggle", { hasText: "Activer les rappels" }).click();
+  await expect(page.getByText("Rappels activés ✔")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("switch", { name: "Activer les rappels" })).toBeChecked();
+  await expect(page.locator("select.select")).toHaveValue("19");
+  await page.locator("select.select").selectOption("8");
+  await expect(page.locator("select.select")).toHaveValue("8");
+  await page.screenshot({ path: "test-results/settings-reminders.png" });
+});

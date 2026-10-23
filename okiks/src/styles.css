@@ -1671,3 +1671,514 @@ mark {
 .arch__content {
   position: relative;
 }
+
+/* ==========================================================================
+   Okiko 3D — animations et interactions
+   ========================================================================== */
+.okiko {
+  display: block;
+  margin-inline: auto;
+  overflow: visible;
+  filter: drop-shadow(0 6px 8px rgba(120, 50, 10, 0.25));
+  -webkit-tap-highlight-color: transparent;
+}
+.okiko--interactive {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.okiko--interactive:hover {
+  transform: scale(1.04) rotate(-1deg);
+}
+.okiko--interactive:active {
+  transform: scale(0.96);
+}
+.okiko__all {
+  transform-origin: 80px 170px;
+  animation: okiko-breathe 3.2s ease-in-out infinite;
+}
+.okiko__head {
+  transform-origin: 80px 112px;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.25s ease-out;
+}
+.okiko__pupils {
+  transform: translate(var(--look-x, 0), var(--look-y, 0));
+  transition: transform 0.12s ease-out;
+}
+.okiko__eyes {
+  transform-origin: 80px 76px;
+  animation: okiko-blink 4.6s infinite;
+}
+.okiko__tail {
+  transform-origin: 102px 142px;
+  animation: okiko-wag 1.8s ease-in-out infinite;
+}
+.okiko__ear--l {
+  transform-origin: 62px 56px;
+  animation: okiko-ear-l 5s ease-in-out infinite;
+}
+.okiko__ear--r {
+  transform-origin: 98px 56px;
+  animation: okiko-ear-r 6.2s ease-in-out infinite;
+}
+.okiko__arm--l {
+  transform-origin: 62px 122px;
+}
+.okiko__arm--r {
+  transform-origin: 98px 122px;
+}
+.okiko__shadow {
+  transform-origin: 80px 172px;
+}
+
+/* Salut (au toucher) */
+.okiko--wave .okiko__arm--l {
+  animation: okiko-wave 0.45s ease-in-out 3;
+}
+.okiko--wave .okiko__all {
+  animation: okiko-hop 0.45s ease-out;
+}
+/* Joie : saut, bras levés, queue rapide */
+.okiko--cheer .okiko__all {
+  animation: okiko-jump 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) 2;
+}
+.okiko--cheer .okiko__shadow {
+  animation: okiko-shadow 0.7s ease-in-out 2;
+}
+.okiko--cheer .okiko__arm--l {
+  transform: rotate(95deg);
+}
+.okiko--cheer .okiko__arm--r {
+  transform: rotate(-95deg);
+}
+.okiko--cheer .okiko__tail,
+.okiko--happy .okiko__tail {
+  animation-duration: 0.9s;
+}
+/* Tristesse : tête basse, oreilles tombantes, queue immobile */
+.okiko--sad .okiko__head {
+  transform: rotate(5deg) translateY(4px);
+}
+.okiko--sad .okiko__ear--l {
+  animation: none;
+  transform: rotate(-16deg);
+}
+.okiko--sad .okiko__ear--r {
+  animation: none;
+  transform: rotate(16deg);
+}
+.okiko--sad .okiko__tail {
+  animation: none;
+  transform: rotate(18deg);
+}
+/* Réflexion / écriture : le crayon s'agite */
+.okiko--think .okiko__head {
+  transform: rotate(-8deg);
+}
+.okiko--write .okiko__head {
+  transform: rotate(6deg) translateY(2px);
+}
+.okiko--write .okiko__arm--r {
+  animation: okiko-scribble 0.35s ease-in-out infinite alternate;
+}
+.okiko--think .okiko__arm--r {
+  transform: rotate(-38deg);
+}
+
+@keyframes okiko-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-1.5px) scale(1.01, 0.995);
+  }
+}
+@keyframes okiko-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes okiko-wag {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}
+@keyframes okiko-ear-l {
+  0%,
+  88%,
+  100% {
+    transform: rotate(0);
+  }
+  92% {
+    transform: rotate(-9deg);
+  }
+  96% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes okiko-ear-r {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  85% {
+    transform: rotate(9deg);
+  }
+  90% {
+    transform: rotate(-3deg);
+  }
+}
+@keyframes okiko-wave {
+  0%,
+  100% {
+    transform: rotate(40deg);
+  }
+  50% {
+    transform: rotate(75deg);
+  }
+}
+@keyframes okiko-hop {
+  40% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes okiko-jump {
+  0% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+  45% {
+    transform: translateY(-22px) scale(0.96, 1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@keyframes okiko-shadow {
+  45% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+}
+@keyframes okiko-scribble {
+  from {
+    transform: rotate(-6deg) translateY(0);
+  }
+  to {
+    transform: rotate(5deg) translateY(1.5px);
+  }
+}
+
+/* Bulle de dialogue */
+.okiko-says {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.okiko-says .okiko {
+  margin: 0;
+  flex: none;
+}
+.okiko-says__bubble {
+  position: relative;
+  margin: 0;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 0.7rem 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  animation: bubble-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.okiko-says__bubble::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline-start: -9px;
+  width: 14px;
+  height: 14px;
+  background: inherit;
+  border: inherit;
+  border-width: 0 0 2px 2px;
+  transform: translateY(-50%) rotate(45deg);
+}
+:root[dir="rtl"] .okiko-says__bubble::before {
+  transform: translateY(-50%) rotate(-135deg);
+}
+@keyframes bubble-in {
+  from {
+    transform: scale(0.6) translateY(8px);
+    opacity: 0;
+  }
+}
+
+/* Icônes 3D */
+.e3d {
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+  user-select: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.18));
+}
+.e3d--text {
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Accueil vivant, compagnon de leçon, effets
+   ========================================================================== */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--majorelle) 14%, var(--surface)), var(--surface) 60%);
+  border: 2px solid var(--line);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(42, 75, 215, 0.12);
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  color: var(--majorelle);
+  pointer-events: none;
+}
+.hero .okiko-says {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.hero .okiko-says__bubble {
+  font-size: 0.95rem;
+}
+.hero__goal {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  flex: none;
+}
+.hero__goal-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+.ring svg {
+  position: absolute;
+  inset: 0;
+}
+.ring__value {
+  transition: stroke-dashoffset 1s cubic-bezier(0.3, 1.2, 0.5, 1);
+}
+.ring__content {
+  position: relative;
+}
+
+.reminder-ask {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 0.8rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--saffron) 16%, var(--surface));
+  border: 2px solid color-mix(in srgb, var(--saffron) 60%, transparent);
+  animation: rise 0.4s ease;
+}
+.reminder-ask__body {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1;
+}
+.reminder-ask .row {
+  margin-top: 0.3rem;
+  justify-content: flex-end;
+}
+.ring-bell {
+  animation: bell 2.4s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+@keyframes bell {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+  82% {
+    transform: rotate(-12deg);
+  }
+  89% {
+    transform: rotate(8deg);
+  }
+}
+
+/* Compagnon pendant la leçon */
+.lesson__body {
+  position: relative;
+}
+.lesson__buddy {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+  opacity: 0.95;
+}
+.lesson__buddy .okiko {
+  margin: 0;
+}
+.lesson__buddy-say {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 0.3rem 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.feedback__okiko {
+  flex: none;
+  margin: -1.8rem 0 -0.4rem !important;
+}
+@media (max-width: 520px) {
+  .feedback {
+    position: relative;
+  }
+  /* Sur téléphone, Okiko réagit au-dessus du bandeau de réponse. */
+  .feedback__okiko {
+    position: absolute;
+    top: -78px;
+    inset-inline-end: 4px;
+    margin: 0 !important;
+    width: 64px;
+    height: 72px;
+  }
+}
+
+/* Effets */
+.confetti {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 60;
+}
+.flame {
+  animation: flame 1.2s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+@keyframes flame {
+  0%,
+  100% {
+    transform: scale(1) rotate(-3deg);
+  }
+  50% {
+    transform: scale(1.12, 1.18) rotate(3deg);
+  }
+}
+.heartbeat {
+  animation: heartbeat 1.6s ease-in-out infinite;
+}
+@keyframes heartbeat {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.18);
+  }
+  20% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+}
+.chest {
+  animation: chest 1s ease-in-out infinite;
+}
+@keyframes chest {
+  0%,
+  100% {
+    transform: rotate(0) scale(1);
+  }
+  25% {
+    transform: rotate(-8deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(8deg) scale(1.1);
+  }
+}
+.bottomnav__icon .e3d {
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.bottomnav__item.is-active .bottomnav__icon .e3d {
+  transform: translateY(-3px) scale(1.15);
+  filter: drop-shadow(0 4px 4px rgba(42, 75, 215, 0.35));
+}
+.bottomnav__item:active .e3d {
+  transform: scale(0.9);
+}
+.node__btn .star8__content .e3d {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+.node__btn.is-current .star8__content .e3d {
+  animation: bounce 1.6s ease-in-out infinite;
+}
+.choice-card .e3d,
+.tile .e3d {
+  transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.choice-card:hover .e3d,
+.choice-card.is-selected .e3d {
+  transform: scale(1.1) rotate(-4deg);
+}
+.choice-card__emoji {
+  width: 84px;
+  height: 84px;
+}
+:root[data-profile="kids"] .choice-card__emoji {
+  width: 100px;
+  height: 100px;
+}
+.stat .e3d {
+  margin-inline-end: 2px;
+}
+.select {
+  min-height: 44px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 0.6rem;
+}
+.tf-card {
+  padding: 0.8rem 1.6rem;
+}

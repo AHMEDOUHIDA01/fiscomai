@@ -84,7 +84,7 @@ export function applyEvent(state: ProgressState, ev: ProgressEvent, ctx: EventCo
           profile: ev.profile,
           uiLang: ev.uiLang,
           dailyGoal: ev.dailyGoal,
-          settings: defaultSettings(ev.profile),
+          settings: { ...defaultSettings(ev.profile), reminders: s.settings.reminders, remindersAsked: s.settings.remindersAsked },
           quests: { day: today, items: questsForDay(today, true) },
         },
       };
@@ -235,5 +235,5 @@ function rollover(s: ProgressState, ctx: EventContext): ProgressState {
 
 function profileDefaults(p: Profile): Partial<Settings> {
   const d = defaultSettings(p);
-  return { slowTts: d.slowTts, reduceMotion: d.reduceMotion, leagueEnabled: d.leagueEnabled };
+  return { slowTts: d.slowTts, reduceMotion: d.reduceMotion, leagueEnabled: d.leagueEnabled, reminderHour: d.reminderHour };
 }

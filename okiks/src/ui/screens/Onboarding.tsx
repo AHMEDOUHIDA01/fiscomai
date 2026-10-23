@@ -6,6 +6,7 @@ import { Button } from "../components/common";
 import { Mascot } from "../components/Mascot";
 import { Zellige } from "../components/Zellige";
 import { Logo } from "../components/Logo";
+import { E } from "../components/Emoji3D";
 
 const GOALS = [
   { xp: 10, key: "goalCasual" },
@@ -56,7 +57,7 @@ export function Onboarding() {
             <div className="stack">
               {PROFILES.map((p) => (
                 <button key={p.id} type="button" className={`option-card option-card--row ${profile === p.id ? "is-selected" : ""}`} onClick={() => setProfile(p.id)}>
-                  <span className="option-card__icon" aria-hidden="true">{p.icon}</span>
+                  <span className="option-card__icon"><E e={p.icon} size={48} /></span>
                   <span>
                     <span className="option-card__title">{t(p.title)}</span>
                     <span className="option-card__desc">{t(p.desc)}</span>

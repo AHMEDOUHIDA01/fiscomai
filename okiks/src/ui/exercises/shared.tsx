@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { sayEnglish } from "../../audio";
 import { normalizeText } from "../../engine/grader";
+import { E } from "../components/Emoji3D";
 
 /** Bouton haut-parleur (+ version lente). */
 export function SpeakButtons({ text, slowDefault, big, autoPlay = true, slowLabel }: { text: string; slowDefault: boolean; big?: boolean; autoPlay?: boolean; slowLabel: string }) {
@@ -15,10 +16,10 @@ export function SpeakButtons({ text, slowDefault, big, autoPlay = true, slowLabe
   return (
     <div className="speak-buttons">
       <button type="button" className={`speaker ${big ? "speaker--big" : ""}`} onClick={() => sayEnglish(text, slowDefault)} aria-label="▶ English">
-        🔊
+        <E e="🔊" size={big ? 56 : 30} />
       </button>
       <button type="button" className="speaker speaker--slow" onClick={() => sayEnglish(text, true)} aria-label={slowLabel} title={slowLabel}>
-        🐢
+        <E e="🐢" size={24} />
       </button>
     </div>
   );

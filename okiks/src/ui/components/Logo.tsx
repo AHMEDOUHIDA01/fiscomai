@@ -1,8 +1,9 @@
 import { starPath } from "./Zellige";
+import { FoxHead } from "./Mascot";
 
 /**
  * Emblème OKIKS : étoile marocaine à 8 branches (khatam) en bleu Majorelle,
- * liseré safran, tête de fennec géométrique au centre.
+ * liseré safran, et la tête 3D d'Okiko qui en dépasse.
  */
 export function Emblem({ size = 40, id = "emb" }: { size?: number; id?: string }) {
   return (
@@ -12,24 +13,29 @@ export function Emblem({ size = 40, id = "emb" }: { size?: number; id?: string }
           <stop offset="0" stopColor="#4C6DF5" />
           <stop offset="1" stopColor="#1C35A8" />
         </linearGradient>
-        <linearGradient id={`${id}-fox`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#F7B661" />
-          <stop offset="1" stopColor="#E8893A" />
-        </linearGradient>
+        <radialGradient id={`${id}-fur`} cx="35%" cy="28%" r="78%">
+          <stop offset="0" stopColor="#FFB566" />
+          <stop offset="0.45" stopColor="#F57A21" />
+          <stop offset="1" stopColor="#B9470C" />
+        </radialGradient>
+        <radialGradient id={`${id}-fur2`} cx="30%" cy="20%" r="90%">
+          <stop offset="0" stopColor="#FF9F45" />
+          <stop offset="1" stopColor="#C2500F" />
+        </radialGradient>
+        <radialGradient id={`${id}-white`} cx="40%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset="1" stopColor="#EADBCB" />
+        </radialGradient>
+        <radialGradient id={`${id}-dark`} cx="35%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#4A3530" />
+          <stop offset="1" stopColor="#120C0A" />
+        </radialGradient>
       </defs>
-      <path d={starPath(32, 32, 31, 26)} fill={`url(#${id}-bg)`} />
-      <path d={starPath(32, 32, 26.5, 22.2)} fill="none" stroke="#F2A541" strokeWidth="1.6" />
-      {/* oreilles */}
-      <path d="M17.5 31 L14 13 L28 23.5 Z" fill={`url(#${id}-fox)`} />
-      <path d="M46.5 31 L50 13 L36 23.5 Z" fill={`url(#${id}-fox)`} />
-      <path d="M19.5 27 L17.5 17.5 L25 23.5 Z" fill="#FFE3BF" />
-      <path d="M44.5 27 L46.5 17.5 L39 23.5 Z" fill="#FFE3BF" />
-      {/* tête */}
-      <path d="M17 29 Q32 19 47 29 Q45.5 43 32 50.5 Q18.5 43 17 29 Z" fill={`url(#${id}-fox)`} />
-      <path d="M23.5 37.5 Q32 33.5 40.5 37.5 Q38.5 45.5 32 49.5 Q25.5 45.5 23.5 37.5 Z" fill="#FFF6EA" />
-      <ellipse cx="26" cy="33.2" rx="1.9" ry="2.3" fill="#1E1433" />
-      <ellipse cx="38" cy="33.2" rx="1.9" ry="2.3" fill="#1E1433" />
-      <path d="M29.6 41.2 L34.4 41.2 L32 43.8 Z" fill="#1E1433" strokeLinejoin="round" />
+      <path d={starPath(32, 34, 29, 24.5)} fill={`url(#${id}-bg)`} />
+      <path d={starPath(32, 34, 25, 21)} fill="none" stroke="#F2A541" strokeWidth="1.5" />
+      <g transform="translate(1.6 8) scale(0.38)">
+        <FoxHead id={id} mood="happy" />
+      </g>
     </svg>
   );
 }

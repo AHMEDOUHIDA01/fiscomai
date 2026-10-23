@@ -12,6 +12,8 @@ import { href, navigate } from "../router";
 import { Button, Modal, ProgressBar, Toggle } from "../components/common";
 import { Mascot } from "../components/Mascot";
 import { Page } from "../components/Shell";
+import { disableReminders, enableReminders, notifySupport, showReminder } from "../../notify";
+import { E } from "../components/Emoji3D";
 
 const tz = () => new Date().getTimezoneOffset();
 
@@ -60,7 +62,7 @@ export function LeagueScreen() {
           return (
             <li key={r.id} className={`lb-row ${r.isMe ? "lb-row--me" : ""} ${zone ? `lb-row--${zone}` : ""}`}>
               <span className="lb-row__rank">{rank}</span>
-              <span className="lb-row__avatar" aria-hidden="true">{r.avatar}</span>
+              <span className="lb-row__avatar"><E e={r.avatar} size={34} /></span>
               <bdi className="lb-row__name">{r.name}</bdi>
               <span className="lb-row__xp" dir="ltr">{r.xp} XP</span>
               {rank === PROMOTE && zone === "up" && <span className="lb-zone lb-zone--up">▲ {t("promotionZone")}</span>}
@@ -114,13 +116,13 @@ export function QuestsScreen() {
       <ul className="card-list">
         {s.quests.items.map((q) => (
           <li key={q.id} className={`quest ${q.done ? "quest--done" : ""}`}>
-            <span className="quest__icon" aria-hidden="true">{QUEST_ICON[q.kind]}</span>
+            <span className="quest__icon"><E e={QUEST_ICON[q.kind]} size={44} /></span>
             <div className="quest__body">
               <strong>{t(QUEST_TEXT[q.kind], { n: q.target })}</strong>
               <ProgressBar value={q.progress / q.target} color={q.done ? "var(--mint)" : "var(--saffron)"} />
               <span className="muted"><bdi dir="ltr">{q.progress} / {q.target}</bdi></span>
             </div>
-            <span className="quest__reward">{q.done ? "✔" : `💎 ${q.reward}`}</span>
+            <span className="quest__reward">{q.done ? <E e="✅" size={28} /> : <><E e="💎" size={22} /> {q.reward}</>}</span>
           </li>
         ))}
       </ul>
@@ -142,7 +144,7 @@ export function ShopScreen() {
     <Page>
       <section className="page-head page-head--gold">
         <h1>{t("shopTitle")}</h1>
-        <p className="shop-gems">💎 {s.gems}</p>
+        <p className="shop-gems"><E e="💎" size={30} /> {s.gems}</p>
       </section>
       {kids && <p className="notice">{t("shopKidsLocked")}</p>}
       <ul className="card-list">
@@ -150,15 +152,15 @@ export function ShopScreen() {
           const full = item.kind === "hearts" ? hearts >= MAX_HEARTS : s.streak.freezes >= MAX_FREEZES;
           return (
             <li key={item.id} className="shop-item">
-              <span className="shop-item__icon" aria-hidden="true">{item.icon}</span>
+              <span className="shop-item__icon"><E e={item.icon} size={48} /></span>
               <div className="shop-item__body">
                 <strong>{pickTr(lang, item.title)}</strong>
                 <span className="muted">{pickTr(lang, item.description)}</span>
                 {item.kind === "freeze" && <span className="muted">{t("freezesOwned", { n: s.streak.freezes })}</span>}
-                {item.kind === "hearts" && <span className="muted">❤️ {hearts} / {MAX_HEARTS}</span>}
+                {item.kind === "hearts" && <span className="muted"><E e="❤️" size={18} /> {hearts} / {MAX_HEARTS}</span>}
               </div>
               <Button variant="gold" disabled={full || s.gems < item.price} onClick={() => dispatch({ type: "buy", item: item.id })}>
-                💎 {item.price}
+                <E e="💎" size={20} /> {item.price}
               </Button>
             </li>
           );
@@ -179,7 +181,7 @@ export function ShopScreen() {
                 </Button>
               ) : (
                 <Button variant="gold" disabled={s.gems < item.price} onClick={() => dispatch({ type: "buy", item: item.id })}>
-                  💎 {item.price}
+                  <E e="💎" size={20} /> {item.price}
                 </Button>
               )}
             </li>
@@ -209,16 +211,16 @@ export function ProfileScreen() {
         <div>
           <h1>{t("profileTitle")}</h1>
           <p className="muted">{t(s.profile === "kids" ? "profileKids" : s.profile === "pro" ? "profilePro" : "profileAdult")} · {LANG_LABEL[s.uiLang as UiLang]}</p>
-          <a className="link-btn" href={href({ name: "settings" })}>⚙️ {t("settings")}</a>
+          <a className="link-btn" href={href({ name: "settings" })}><E e="⚙️" size={20} /> {t("settings")}</a>
         </div>
       </section>
       <div className="stats-grid">
-        <div className="stat-tile"><span>🔥</span><strong>{s.streak.current}</strong><small>{t("streak")}</small></div>
-        <div className="stat-tile"><span>🏅</span><strong>{s.streak.longest}</strong><small>{t("longestStreak")}</small></div>
-        <div className="stat-tile"><span>⚡</span><strong>{s.totalXp}</strong><small>{t("totalXpLabel")}</small></div>
-        <div className="stat-tile"><span>📚</span><strong>{learned}</strong><small>{t("wordsLearned")}</small></div>
-        <div className="stat-tile"><span>🎓</span><strong>{s.lessonsCompleted}</strong><small>{t("lessons")}</small></div>
-        <div className="stat-tile"><span>🏆</span><strong>{pickTr(lang, LEAGUES[s.league.tier].name)}</strong><small>{t("navLeague")}</small></div>
+        <div className="stat-tile"><span><E e="🔥" size={34} /></span><strong>{s.streak.current}</strong><small>{t("streak")}</small></div>
+        <div className="stat-tile"><span><E e="🏅" size={34} /></span><strong>{s.streak.longest}</strong><small>{t("longestStreak")}</small></div>
+        <div className="stat-tile"><span><E e="⚡" size={34} /></span><strong>{s.totalXp}</strong><small>{t("totalXpLabel")}</small></div>
+        <div className="stat-tile"><span><E e="📚" size={34} /></span><strong>{learned}</strong><small>{t("wordsLearned")}</small></div>
+        <div className="stat-tile"><span><E e="🎓" size={34} /></span><strong>{s.lessonsCompleted}</strong><small>{t("lessons")}</small></div>
+        <div className="stat-tile"><span><E e="🏆" size={34} /></span><strong>{pickTr(lang, LEAGUES[s.league.tier].name)}</strong><small>{t("navLeague")}</small></div>
       </div>
       <h2 className="list-title">{t("thisWeek")}</h2>
       <div className="week-chart" role="img" aria-label={t("thisWeek")}>
@@ -228,7 +230,7 @@ export function ProfileScreen() {
             <div key={d} className={`week-chart__day ${d === today ? "is-today" : ""}`}>
               <span className="week-chart__xp">{xp || ""}</span>
               <span className="week-chart__bar" style={{ height: `${(xp / maxXp) * 100}%` }} />
-              <span className="week-chart__label">{frozen.has(d) ? "🧊" : xp > 0 ? "🔥" : "·"}</span>
+              <span className="week-chart__label">{frozen.has(d) ? <E e="🧊" size={18} /> : xp > 0 ? <E e="🔥" size={18} /> : "·"}</span>
             </div>
           );
         })}
@@ -239,7 +241,7 @@ export function ProfileScreen() {
           const got = s.achievements.includes(a.id);
           return (
             <li key={a.id} className={`ach ${got ? "" : "ach--locked"}`}>
-              <span className="ach__icon" aria-hidden="true">{a.icon}</span>
+              <span className="ach__icon"><E e={a.icon} size={36} /></span>
               <span>{pickTr(lang, a.title)}</span>
             </li>
           );
@@ -304,6 +306,7 @@ export function SettingsScreen() {
           <Toggle label={t("reduceMotion")} checked={s.settings.reduceMotion} onChange={(v) => set({ reduceMotion: v })} />
           <Toggle label={t("leagueSetting")} checked={s.settings.leagueEnabled} onChange={(v) => set({ leagueEnabled: v })} />
         </fieldset>
+        <RemindersSettings />
         <fieldset>
           <legend>{t("theme")}</legend>
           <div className="seg">
@@ -337,5 +340,59 @@ export function SettingsScreen() {
         </Modal>
       )}
     </Page>
+  );
+}
+
+function RemindersSettings() {
+  const t = useT();
+  const s = useApp((x) => x.state);
+  const dispatch = useApp((x) => x.dispatch);
+  const [msg, setMsg] = useState<string | null>(null);
+  const support = notifySupport();
+  return (
+    <fieldset>
+      <legend><E e="🔔" size={22} /> {t("remindersTitle")}</legend>
+      {support === "unsupported" ? (
+        <p className="muted">{t("remindersUnsupported")}</p>
+      ) : (
+        <>
+          <Toggle
+            label={t("remindersEnable")}
+            checked={s.settings.reminders}
+            onChange={async (on) => {
+              if (!on) {
+                await disableReminders();
+                dispatch({ type: "settings", patch: { reminders: false } });
+                return;
+              }
+              const ok = await enableReminders();
+              setMsg(ok ? t("remindersOn") : t("remindersDenied"));
+              if (ok) dispatch({ type: "settings", patch: { reminders: true, remindersAsked: true } });
+            }}
+          />
+          {s.settings.reminders && (
+            <>
+              <label className="toggle">
+                <span>{t("reminderAt")}</span>
+                <select
+                  className="select"
+                  value={s.settings.reminderHour}
+                  onChange={(e) => dispatch({ type: "settings", patch: { reminderHour: Number(e.target.value) } })}
+                >
+                  {Array.from({ length: 16 }, (_, i) => i + 7).map((h) => (
+                    <option key={h} value={h}>{`${String(h).padStart(2, "0")}:00`}</option>
+                  ))}
+                </select>
+              </label>
+              <Button variant="secondary" onClick={() => void showReminder(s, true)}>
+                <E e="📣" size={20} /> {t("reminderTest")}
+              </Button>
+            </>
+          )}
+          {msg && <p className="muted">{msg}</p>}
+          {support === "denied" && <p className="muted">{t("remindersDenied")}</p>}
+        </>
+      )}
+    </fieldset>
   );
 }

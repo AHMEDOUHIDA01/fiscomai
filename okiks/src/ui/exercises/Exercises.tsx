@@ -16,6 +16,7 @@ import { dirOf, pickTr, translate } from "../../i18n/strings";
 import { createRng, shuffle } from "../../engine/rng";
 import type { ExerciseProps, ExerciseResult } from "./types";
 import { EnglishLine, SpeakButtons, TileBank, useTileBank } from "./shared";
+import { E } from "../components/Emoji3D";
 
 /** Convertit le verdict du correcteur en résultat affichable. */
 function fromGrade(g: GradeResult, reference: string, meaning?: string): ExerciseResult {
@@ -70,7 +71,7 @@ export function SelectImageEx({ ex, lang, settings, locked, setChecker }: Exerci
             }}
             aria-pressed={sel === o.wordId}
           >
-            <span className="choice-card__emoji" aria-hidden="true">{o.emoji}</span>
+            <E e={o.emoji} size={84} className="choice-card__emoji" />
             <span className="choice-card__label">{pickTr(lang, o.label)}</span>
             <kbd className="choice-card__key">{i + 1}</kbd>
           </button>
@@ -92,7 +93,7 @@ export function TranslateToEnglishEx({ ex, lang, settings, locked, setChecker }:
   return (
     <div className="ex">
       <div className="bubble-row">
-        <span className="bubble-row__avatar" aria-hidden="true">🧕</span>
+        <span className="bubble-row__avatar"><E e="🧕" size={64} /></span>
         <p className="bubble" dir={dirOf(lang)}>{pickTr(lang, ex.source)}</p>
       </div>
       {useKeyboard ? (
@@ -140,7 +141,7 @@ export function TranslateToNativeEx({ ex, lang, settings, locked, setChecker }: 
   return (
     <div className="ex">
       <div className="bubble-row">
-        <span className="bubble-row__avatar" aria-hidden="true">🧔🏽</span>
+        <span className="bubble-row__avatar"><E e="🧔🏽" size={64} /></span>
         <div className="bubble bubble--en">
           {settings.listenEnabled && <SpeakButtons text={ex.english} slowDefault={settings.slowTts} slowLabel={translate(lang, "slow")} />}
           <EnglishLine text={ex.english} slow={settings.slowTts} />
@@ -331,7 +332,7 @@ export function SpeakEx({ ex, lang, settings, locked, setChecker, finish }: Exer
   return (
     <div className="ex">
       <div className="bubble-row">
-        <span className="bubble-row__avatar" aria-hidden="true">👩🏽‍💼</span>
+        <span className="bubble-row__avatar"><E e="👩🏽‍💼" size={64} /></span>
         <div className="bubble bubble--en">
           <SpeakButtons text={ex.english} slowDefault={settings.slowTts} autoPlay={settings.listenEnabled} slowLabel={translate(lang, "slow")} />
           <EnglishLine text={ex.english} slow={settings.slowTts} />
@@ -339,7 +340,7 @@ export function SpeakEx({ ex, lang, settings, locked, setChecker, finish }: Exer
       </div>
       {supported ? (
         <button type="button" className={`mic ${state === "listening" ? "mic--on" : ""}`} disabled={locked || state === "listening"} onClick={start}>
-          <span aria-hidden="true">🎙️</span> {translate(lang, state === "listening" ? "listening" : "tapToSpeak")}
+          <E e="🎙️" size={30} /> {translate(lang, state === "listening" ? "listening" : "tapToSpeak")}
         </button>
       ) : (
         <p className="ex__note">{translate(lang, "speechUnsupported")}</p>
@@ -373,13 +374,13 @@ export function ListenTrueFalseEx({ ex, lang, settings, locked, setChecker }: Ex
   return (
     <div className="ex ex--center">
       <SpeakButtons text={ex.spoken} slowDefault={settings.slowTts} big slowLabel={translate(lang, "slow")} />
-      <div className="tf-card" aria-hidden="true">{ex.emoji}</div>
+      <div className="tf-card"><E e={ex.emoji} size={128} /></div>
       <div className="option-row">
         <button type="button" className={`tile tile--big ${sel === true ? "is-selected" : ""}`} disabled={locked} onClick={() => setSel(true)}>
-          ✅ {translate(lang, "yes")}
+          <E e="✅" size={26} /> {translate(lang, "yes")}
         </button>
         <button type="button" className={`tile tile--big ${sel === false ? "is-selected" : ""}`} disabled={locked} onClick={() => setSel(false)}>
-          ❌ {translate(lang, "no")}
+          <E e="❌" size={26} /> {translate(lang, "no")}
         </button>
       </div>
     </div>

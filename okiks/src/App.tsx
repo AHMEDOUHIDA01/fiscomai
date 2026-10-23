@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApp, useLang, useT } from "./store";
 import { setSoundEnabled } from "./audio";
+import { msUntilReminder, reminderDue, showReminder } from "./notify";
 import { dirOf } from "./i18n/strings";
 import { navigate, useRoute } from "./ui/router";
 import { Onboarding } from "./ui/screens/Onboarding";
@@ -26,6 +27,19 @@ export function App() {
   }, [dispatch]);
 
   useEffect(() => setSoundEnabled(state.settings.sound), [state.settings.sound]);
+
+  // Rappel quand l'application reste ouverte (ordinateur, onglet en arrière-plan).
+  useEffect(() => {
+    if (!state.settings.reminders) return;
+    const ms = msUntilReminder(state, Date.now());
+    if (ms === null) return;
+    const id = setTimeout(() => {
+      const s = useApp.getState().state;
+      if (reminderDue(s, Date.now(), new Date().getTimezoneOffset())) void showReminder(s);
+    }, ms);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.settings.reminders, state.settings.reminderHour]);
 
   // Langue, direction et thème sur <html>.
   useEffect(() => {

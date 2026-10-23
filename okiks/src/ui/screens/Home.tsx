@@ -10,10 +10,14 @@ import { XP } from "../../engine/progress/reducer";
 import { pickTr } from "../../i18n/strings";
 import { useApp, useLang, useT } from "../../store";
 import { navigate } from "../router";
-import { Button, ProgressBar, Star8 } from "../components/common";
-import { Mascot } from "../components/Mascot";
+import { Button, Star8 } from "../components/common";
+import { Mascot, OkikoSays } from "../components/Mascot";
+import { Ring } from "../components/Fx";
+import { enableReminders, notifySupport } from "../../notify";
+import type { StringKey } from "../../i18n/strings";
 import { Page } from "../components/Shell";
 import { Zellige } from "../components/Zellige";
+import { E } from "../components/Emoji3D";
 
 const UNIT_COLORS = ["#2A4BD7", "#2E9E6A", "#C8553D", "#B07D2B", "#5B4BC4", "#1F8A8A", "#C2456F", "#3A7CA5"];
 
@@ -34,17 +38,33 @@ export function Home() {
   const timeUp = s.profile === "kids" && s.parentalDailyMinutes !== null && (s.msByDay[today] ?? 0) >= s.parentalDailyMinutes * 60_000;
   const noHearts = heartsEnabled(s) && currentHearts(s.hearts, Date.now()).count === 0;
 
+  const goalDone = xpToday >= s.dailyGoal;
+  const [tapIdx, setTapIdx] = useState(0);
+  const bubble = okikoLine(t, s.streak.current, s.streak.lastActiveDay === today, goalDone, tapIdx);
+  const showReminderAsk = !s.settings.reminders && !s.settings.remindersAsked && s.lessonsCompleted > 0 && notifySupport() === "ok";
+
   let unitNumber = 0;
   return (
     <Page className="home">
-      <section className="goal-card">
-        <Mascot size={64} mood={xpToday >= s.dailyGoal ? "cheer" : "happy"} outfit={s.outfits.equipped} />
-        <div className="goal-card__body">
-          <span className="goal-card__label">{t("dailyGoal")}</span>
-          <ProgressBar value={xpToday / s.dailyGoal} color="var(--saffron)" />
-          <span className="goal-card__value"><bdi dir="ltr">⚡ {xpToday} / {s.dailyGoal}</bdi></span>
+      <section className="hero">
+        <div className="hero__bg"><Zellige id="hero-z" opacity={0.1} /></div>
+        <OkikoSays
+          size={112}
+          mood={goalDone ? "cheer" : "happy"}
+          outfit={s.outfits.equipped}
+          text={bubble}
+          onTap={() => setTapIdx((i) => i + 1)}
+        />
+        <div className="hero__goal">
+          <Ring value={xpToday / s.dailyGoal} size={84} color={goalDone ? "var(--mint)" : "var(--saffron)"}>
+            <E e={goalDone ? "🏆" : "⚡"} size={34} />
+          </Ring>
+          <span className="hero__goal-label">{t("dailyGoal")}</span>
+          <span className="goal-card__value"><bdi dir="ltr">{xpToday} / {s.dailyGoal} XP</bdi></span>
         </div>
       </section>
+
+      {showReminderAsk && <ReminderAsk />}
 
       {timeUp && (
         <section className="notice notice--blue">
@@ -56,12 +76,12 @@ export function Home() {
       <div className="review-row">
         {s.mistakes.some((id) => idx.wordById.has(id)) && (
           <Button variant="secondary" disabled={timeUp} onClick={() => navigate({ name: "review", kind: "mistakes" })}>
-            🔁 {t("mistakesReview")}
+            <E e="🔁" size={22} /> {t("mistakesReview")}
           </Button>
         )}
         {Object.keys(s.memory).some((id) => idx.wordById.has(id)) && (
           <Button variant="secondary" disabled={timeUp} onClick={() => navigate({ name: "review", kind: "practice" })}>
-            🏋️ {t("practice")}
+            <E e="🏋️" size={22} /> {t("practice")}
           </Button>
         )}
       </div>
@@ -82,7 +102,7 @@ export function Home() {
                   <div className="unit__banner-bg"><Zellige id={`z-${unit.id}`} opacity={0.2} color="#fff" /></div>
                   <div>
                     <span className="unit__number">{t("unit", { n: ui + 1 })}</span>
-                    <h3 className="unit__title">{unit.icon} {pickTr(lang, unit.title)}</h3>
+                    <h3 className="unit__title"><E e={unit.icon} size={34} /> {pickTr(lang, unit.title)}</h3>
                     <p className="unit__scene">{pickTr(lang, unit.scene)}</p>
                   </div>
                   <UnitStrength unit={unit} />
@@ -105,7 +125,7 @@ export function Home() {
                           aria-label={`${pickTr(lang, unit.title)} — ${t("level", { n: level, m: LEVELS_PER_UNIT })}`}
                         >
                           <Star8 size={isCurrent ? 84 : 72} fill={locked ? "var(--locked)" : isDone ? "var(--saffron)" : color}>
-                            <span aria-hidden="true">{isDone ? "★" : locked ? "🔒" : level === LEVELS_PER_UNIT ? "🎁" : "✦"}</span>
+                            <E e={isDone ? "⭐" : locked ? "🔒" : level === LEVELS_PER_UNIT ? "🎁" : "✏️"} size={isCurrent ? 40 : 34} />
                           </Star8>
                           {isCurrent && <span className="node__start">{t("start")}</span>}
                         </button>
@@ -154,7 +174,49 @@ function UnitStrength({ unit }: { unit: Unit }) {
   const r = averageRecall(memory, seen.map((w) => w.id), Date.now());
   return (
     <span className="unit__strength" title={`${Math.round(r * 100)}%`} aria-hidden="true">
-      {r > 0.8 ? "🟢" : r > 0.5 ? "🟡" : "🔴"}
+      <E e={r > 0.8 ? "🟢" : r > 0.5 ? "🟡" : "🔴"} size={20} />
     </span>
+  );
+}
+
+const TAPS: StringKey[] = ["tap1", "tap2", "tap3", "tap4", "tap5"];
+
+/** Ce que dit Okiko sur l'accueil : selon l'heure, la série, l'objectif — ou une réplique quand on le touche. */
+function okikoLine(t: ReturnType<typeof useT>, streak: number, doneToday: boolean, goalDone: boolean, tapIdx: number): string {
+  if (tapIdx > 0) return t(TAPS[(tapIdx - 1) % TAPS.length]);
+  if (goalDone) return t("goalDone");
+  const h = new Date().getHours();
+  if (streak > 0 && !doneToday && h >= 17) return t("streakRisk", { n: streak });
+  return t(h < 12 ? "hiMorning" : h < 18 ? "hiAfternoon" : "hiEvening");
+}
+
+/** Carte qui propose d'activer les rappels (après la première leçon). */
+function ReminderAsk() {
+  const t = useT();
+  const dispatch = useApp((x) => x.dispatch);
+  const [denied, setDenied] = useState(false);
+  return (
+    <section className="reminder-ask">
+      <E e="🔔" size={52} className="ring-bell" />
+      <div className="reminder-ask__body">
+        <strong>{t("remindersAskTitle")}</strong>
+        <span className="muted">{denied ? t("remindersDenied") : t("remindersAskBody")}</span>
+        <div className="row">
+          <Button variant="ghost" onClick={() => dispatch({ type: "settings", patch: { remindersAsked: true } })}>
+            {t("remindersLater")}
+          </Button>
+          <Button
+            variant="gold"
+            onClick={async () => {
+              const ok = await enableReminders();
+              if (!ok) return setDenied(true);
+              dispatch({ type: "settings", patch: { reminders: true, remindersAsked: true } });
+            }}
+          >
+            {t("remindersEnable")}
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { applyEvent, type ProgressEvent, type SessionReward } from "./engine/progress/reducer";
-import { initialState, type ProgressState } from "./engine/progress/state";
+import { defaultSettings, initialState, type ProgressState } from "./engine/progress/state";
 import type { Repository } from "./storage/repository";
 import { translate, type StringKey } from "./i18n/strings";
 
@@ -27,6 +27,8 @@ export const useApp = create<AppStore>((set, get) => ({
     repo = r;
     const saved = await r.load().catch(() => null);
     const base = saved && saved.version === 1 ? saved : initialState(Date.now());
+    // Les réglages ajoutés après la première installation reçoivent leur valeur par défaut.
+    base.settings = { ...defaultSettings(base.profile), ...base.settings };
     set({ ready: true, state: applyEvent(base, { type: "tick" }, ctx()).state });
   },
 

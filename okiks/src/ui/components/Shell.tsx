@@ -6,6 +6,7 @@ import { dayKey } from "../../engine/progress/time";
 import { dirOf } from "../../i18n/strings";
 import { href, useRoute, type Route } from "../router";
 import { Logo } from "./Logo";
+import { E } from "./Emoji3D";
 
 export function TopBar() {
   const t = useT();
@@ -19,12 +20,12 @@ export function TopBar() {
         <Logo size={34} id="top" />
       </a>
       <div className="topbar__stats">
-        <span className={`stat ${lit ? "stat--fire" : "stat--off"}`} title={t("streak")}>🔥 {s.streak.current}</span>
-        <a className="stat stat--gems" href={href({ name: "shop" })} title={t("gems")}>💎 {s.gems}</a>
+        <span className={`stat ${lit ? "stat--fire" : "stat--off"}`} title={t("streak")}><E e="🔥" size={26} className={lit ? "flame" : ""} /> {s.streak.current}</span>
+        <a className="stat stat--gems" href={href({ name: "shop" })} title={t("gems")}><E e="💎" size={24} /> {s.gems}</a>
         {heartsEnabled(s) ? (
-          <a className="stat stat--hearts" href={href({ name: "shop" })} title={t("hearts")}>❤️ {hearts}</a>
+          <a className="stat stat--hearts" href={href({ name: "shop" })} title={t("hearts")}><E e="❤️" size={24} className="heartbeat" /> {hearts}</a>
         ) : (
-          <span className="stat stat--hearts" title={t("hearts")}>❤️ ∞</span>
+          <span className="stat stat--hearts" title={t("hearts")}><E e="❤️" size={24} /> ∞</span>
         )}
       </div>
     </header>
@@ -48,7 +49,7 @@ export function BottomNav() {
         const active = route.name === n.route.name || (n.route.name === "profile" && route.name === "settings");
         return (
           <a key={n.key} className={`bottomnav__item ${active ? "is-active" : ""}`} href={href(n.route)} aria-current={active ? "page" : undefined}>
-            <span className="bottomnav__icon" aria-hidden="true">{n.icon}</span>
+            <span className="bottomnav__icon"><E e={n.icon} size={32} /></span>
             <span className="bottomnav__label">{t(n.key)}</span>
           </a>
         );

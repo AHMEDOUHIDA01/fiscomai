@@ -28,6 +28,12 @@ export interface Settings {
   listenEnabled: boolean;
   leagueEnabled: boolean;
   theme: "auto" | "light" | "dark";
+  /** Rappel quotidien par notification. */
+  reminders: boolean;
+  /** Heure locale du rappel (0–23). */
+  reminderHour: number;
+  /** L'élève a déjà vu la proposition d'activer les rappels. */
+  remindersAsked: boolean;
 }
 
 export interface ProgressState {
@@ -72,6 +78,9 @@ export function defaultSettings(profile: Profile | null): Settings {
     listenEnabled: true,
     leagueEnabled: profile !== "kids",
     theme: "auto",
+    reminders: false,
+    reminderHour: profile === "kids" ? 17 : 19,
+    remindersAsked: false,
   };
 }
 

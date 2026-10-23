@@ -16,6 +16,9 @@ import { Mascot } from "../components/Mascot";
 import { Zellige } from "../components/Zellige";
 import type { ExerciseResult } from "../exercises/types";
 import * as X from "../exercises/Exercises";
+import { Confetti, CountUp, haptic } from "../components/Fx";
+import type { Mood } from "../components/Mascot";
+import { E } from "../components/Emoji3D";
 
 const INSTRUCTION: Record<Exercise["type"], StringKey> = {
   selectImage: "exSelectImage",
@@ -30,6 +33,13 @@ const INSTRUCTION: Record<Exercise["type"], StringKey> = {
 };
 
 const LISTENING = new Set<Exercise["type"]>(["listenType", "listenOrder", "listenTrueFalse"]);
+const WRITING = new Set<Exercise["type"]>(["translateToEnglish", "listenType"]);
+
+function buddyMood(ex: Exercise): Mood {
+  if (WRITING.has(ex.type)) return "write";
+  if (ex.type === "speak" || LISTENING.has(ex.type)) return "think";
+  return "happy";
+}
 
 type Props = { kind: SessionKind; unitId?: string; level?: number };
 
@@ -79,6 +89,7 @@ export function LessonScreen({ kind, unitId, level }: Props) {
   const record = (r: ExerciseResult) => {
     setResult(r);
     (r.correct ? sfx.correct : sfx.wrong)();
+    haptic(r.correct ? 18 : [40, 60, 40]);
     dispatch({ type: "answer", wordIds: ex.wordIds, correct: r.correct, exerciseType: ex.type, sessionKind: kind });
     setStats((s) => {
       const combo = r.correct ? s.combo + 1 : 0;
@@ -158,15 +169,21 @@ export function LessonScreen({ kind, unitId, level }: Props) {
         </button>
         <ProgressBar value={pos / queue.length + (result ? 1 / queue.length : 0)} />
         {usesHearts ? (
-          <span className="stat stat--hearts" aria-label={`${hearts} ${t("hearts")}`}>❤️ {hearts}</span>
+          <span className="stat stat--hearts" aria-label={`${hearts} ${t("hearts")}`}><E e="❤️" size={26} className="heartbeat" /> {hearts}</span>
         ) : (
-          stats.combo >= 3 && <span className="stat stat--combo">🔥 {stats.combo}</span>
+          stats.combo >= 3 && <span className="stat stat--combo"><E e="🔥" size={26} className="flame" /> {stats.combo}</span>
         )}
       </header>
 
       <main className="lesson__body" key={ex.id}>
         <h1 className="lesson__instruction">{t(INSTRUCTION[ex.type])}</h1>
         <ExerciseView ex={ex} {...props} />
+        {!result && (
+          <div className="lesson__buddy">
+            <Mascot size={78} mood={buddyMood(ex)} outfit={state.outfits.equipped} interactive />
+            {WRITING.has(ex.type) && <span className="lesson__buddy-say">{t("lessonWrite")}</span>}
+          </div>
+        )}
       </main>
 
       <footer className={`lesson__footer ${result ? (result.correct ? "is-correct" : "is-wrong") : ""}`}>
@@ -246,6 +263,7 @@ function Feedback({ result, onNext }: { result: ExerciseResult; onNext: () => vo
   const isEnglish = !!result.solution && /^[\x20-\x7E’]+$/.test(result.solution);
   return (
     <div className="feedback" role="status" aria-live="assertive">
+      <Mascot size={70} mood={result.correct ? "cheer" : "sad"} className="feedback__okiko" />
       <div className="feedback__text">
         <strong className="feedback__title">
           <span aria-hidden="true">{result.correct ? "✔" : "✖"}</span> {title}
@@ -255,6 +273,8 @@ function Feedback({ result, onNext }: { result: ExerciseResult; onNext: () => vo
             {highlight(result.solution, result.highlights)}
           </p>
         )}
+        {result.correct && result.verdict === "correct" && <p className="feedback__meaning">{t(Math.random() < 0.5 ? "lessonCheer" : "lessonCheer2")}</p>}
+        {!result.correct && <p className="feedback__meaning">{t("lessonOops")}</p>}
         {result.meaning && !result.correct && (
           <p className="feedback__meaning">
             {t("meaning")} {result.meaning}
@@ -310,31 +330,32 @@ function LessonEnd({ reward, stats, durationMs, total }: { reward: SessionReward
   return (
     <div className="lesson-end" dir={dirOf(lang)}>
       <div className="lesson-end__bg"><Zellige id="end-z" opacity={0.18} /></div>
-      <Mascot mood="cheer" size={150} outfit={state.outfits.equipped} className="bounce" />
+      <Confetti />
+      <Mascot mood="cheer" size={170} outfit={state.outfits.equipped} interactive />
       <h1>{t(reward.perfect ? "perfectLesson" : "lessonComplete")}</h1>
       <div className="stat-cards">
         <div className="stat-card stat-card--gold">
           <span>{t("totalXp")}</span>
-          <strong>⚡ {reward.xp}</strong>
+          <strong><E e="⚡" size={26} /> <CountUp to={reward.xp} /></strong>
         </div>
         <div className="stat-card stat-card--green">
           <span>{t("accuracy")}</span>
-          <strong>🎯 {accuracy}%</strong>
+          <strong><E e="🎯" size={26} /> <CountUp to={accuracy} />%</strong>
         </div>
         <div className="stat-card stat-card--blue">
           <span>{t("time")}</span>
-          <strong>⏱ {formatDuration(lang, durationMs)}</strong>
+          <strong><E e="⏱️" size={26} /> {formatDuration(lang, durationMs)}</strong>
         </div>
       </div>
       <ul className="bonus-list">
-        {reward.morningBonus && <li>🌅 {t("morningBonus")}</li>}
-        {reward.comboBonus && <li>🔥 {t("comboBonus")}</li>}
-        {reward.streakExtended && <li>🔥 {t("streakUp", { n: state.streak.current })}</li>}
-        {reward.unitCompleted && <li>🎁 {t("unitChest", { n: 25 })}</li>}
-        {reward.gems > 0 && <li>💎 +{reward.gems} {t("gems")}</li>}
+        {reward.morningBonus && <li><E e="🌅" /> {t("morningBonus")}</li>}
+        {reward.comboBonus && <li><E e="🔥" /> {t("comboBonus")}</li>}
+        {reward.streakExtended && <li><E e="🔥" className="flame" /> {t("streakUp", { n: state.streak.current })}</li>}
+        {reward.unitCompleted && <li><E e="🎁" className="chest" size={36} /> {t("unitChest", { n: 25 })}</li>}
+        {reward.gems > 0 && <li><E e="💎" /> +{reward.gems} {t("gems")}</li>}
         {unlocked.map((a) => (
           <li key={a.id}>
-            {a.icon} {t("newAchievement")} — {pickTr(lang, a.title)}
+            <E e={a.icon} /> {t("newAchievement")} — {pickTr(lang, a.title)}
           </li>
         ))}
       </ul>
