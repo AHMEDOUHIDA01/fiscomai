@@ -1,0 +1,4 @@
+node_modules/
+dist/
+okiks/test-results/
+okiks/playwright-report/
