@@ -5,6 +5,7 @@ import { useApp } from "../../store";
 import { Button } from "../components/common";
 import { Mascot } from "../components/Mascot";
 import { Zellige } from "../components/Zellige";
+import { Logo } from "../components/Logo";
 
 const GOALS = [
   { xp: 10, key: "goalCasual" },
@@ -35,7 +36,7 @@ export function Onboarding() {
         {step === 0 && (
           <>
             <h1 className="logo">
-              OKIKS <span className="brand-tif" aria-hidden="true">ⵓⴽⵉⴽⵙ</span>
+              <Logo size={56} tifinagh id="ob" />
             </h1>
             <p className="tagline">{t("appTagline")}</p>
             <h2>{t("chooseLang")}</h2>

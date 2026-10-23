@@ -26,6 +26,8 @@
   --ko-bg: #fbe1db;
   --ko-text: #9e3b27;
   --shadow: 0 2px 0 rgba(43, 27, 18, 0.12);
+  --brand-1: #3a5bea;
+  --brand-2: #1c35a8;
 
   --radius: 16px;
   --font-latin: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -55,6 +57,8 @@
     --ko-bg: #42201a;
     --ko-text: #ffab96;
     --shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+    --brand-1: #a9bbff;
+    --brand-2: #6f8cff;
     color-scheme: dark;
   }
 }
@@ -71,6 +75,8 @@
   --ko-bg: #42201a;
   --ko-text: #ffab96;
   --shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  --brand-1: #a9bbff;
+  --brand-2: #6f8cff;
   color-scheme: dark;
 }
 
@@ -535,6 +541,37 @@ mark {
   gap: 0.4rem;
   text-decoration: none;
 }
+.logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  line-height: 1;
+}
+.emblem {
+  flex: none;
+  filter: drop-shadow(0 2px 3px rgba(28, 53, 168, 0.35));
+}
+.logo-lockup__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12em;
+}
+.logo-lockup__word {
+  font-family: var(--font-latin);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, var(--brand-1), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.logo-lockup__tif {
+  font-family: "Noto Sans Tifinagh", sans-serif;
+  font-size: 0.42em;
+  letter-spacing: 0.35em;
+  color: var(--terracotta);
+}
 .brand-mark {
   font-family: var(--font-latin);
   font-weight: 900;
@@ -697,12 +734,9 @@ mark {
   border-top: 8px solid var(--saffron);
 }
 .logo {
-  font-family: var(--font-latin);
-  font-size: 2.4rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  color: var(--majorelle);
-  margin: 0.3rem 0 0;
+  display: flex;
+  justify-content: center;
+  margin: 0.6rem 0 0.2rem;
 }
 .tagline {
   color: var(--terracotta);
@@ -846,7 +880,16 @@ mark {
 }
 .node {
   position: relative;
+  z-index: 1;
   transform: translateX(var(--offset, 0));
+}
+/* L'étoile ouverte passe devant les suivantes (chaque étoile décalée crée son propre plan). */
+.node.is-open {
+  z-index: 15;
+}
+/* Place pour l'étiquette « Commencer » au-dessus de l'étoile courante. */
+.node.is-current {
+  margin-top: 1.9rem;
 }
 :root[dir="rtl"] .node {
   transform: translateX(calc(var(--offset, 0) * -1));
@@ -877,7 +920,8 @@ mark {
 }
 .node__start {
   position: absolute;
-  top: -1.6rem;
+  top: -2.1rem;
+  white-space: nowrap;
   background: var(--surface);
   border: 2px solid var(--line);
   border-radius: 10px;

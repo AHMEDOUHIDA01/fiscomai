@@ -5,6 +5,7 @@ import { heartsEnabled } from "../../engine/progress/state";
 import { dayKey } from "../../engine/progress/time";
 import { dirOf } from "../../i18n/strings";
 import { href, useRoute, type Route } from "../router";
+import { Logo } from "./Logo";
 
 export function TopBar() {
   const t = useT();
@@ -15,8 +16,7 @@ export function TopBar() {
   return (
     <header className="topbar">
       <a className="topbar__brand" href={href({ name: "home" })} aria-label="OKIKS">
-        <span className="brand-mark">OKIKS</span>
-        <span className="brand-tif" aria-hidden="true">ⵓⴽⵉⴽⵙ</span>
+        <Logo size={34} id="top" />
       </a>
       <div className="topbar__stats">
         <span className={`stat ${lit ? "stat--fire" : "stat--off"}`} title={t("streak")}>🔥 {s.streak.current}</span>

@@ -96,7 +96,7 @@ export function Home() {
                     const key = `${unit.id}:${level}`;
                     const offset = OFFSETS[(ui * 3 + li) % OFFSETS.length];
                     return (
-                      <li key={key} className="node" style={{ "--offset": `${offset}px` } as CSSProperties}>
+                      <li key={key} className={`node ${open === key ? "is-open" : ""} ${isCurrent ? "is-current" : ""}`} style={{ "--offset": `${offset}px` } as CSSProperties}>
                         <button
                           type="button"
                           className={`node__btn ${isCurrent ? "is-current" : ""}`}
