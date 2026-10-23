@@ -3,3 +3,4 @@ dist/
 okiks/test-results/
 okiks/playwright-report/
 .netlify/
+*.tsbuildinfo
