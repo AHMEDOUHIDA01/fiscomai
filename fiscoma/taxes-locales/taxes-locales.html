@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taxes Locales — EDI XML DGI</title>
+<style>
+:root{
+  --acc:#0d9488;--acc-d:#0f766e;--acc-l:#ccfbf1;--acc-xl:#f0fdfa;
+  --ink:#0f172a;--ink-2:#334155;--ink-3:#64748b;--ink-4:#94a3b8;
+  --line:#e2e8f0;--line-2:#cbd5e1;--bg:#f6f8fb;--card:#fff;
+  --err:#dc2626;--err-bg:#fef2f2;--warn:#d97706;--warn-bg:#fffbeb;--ok:#059669;--ok-bg:#ecfdf5;
+  --sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans)}
+button{font:inherit;cursor:pointer}
+.hd{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#fff,#fbfdfd);border-bottom:1px solid var(--line);padding:14px 22px 0}
+.hd-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hd-ico{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--acc),#14b8a6);display:grid;place-items:center;color:#fff;box-shadow:0 6px 18px rgba(13,148,136,.28)}
+.hd-ico svg{width:22px;height:22px}
+.hd-t{font-weight:800;font-size:17px;letter-spacing:-.01em}
+.hd-s{color:var(--ink-3);font-size:12px}
+.hd-act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line-2);background:#fff;color:var(--ink-2);border-radius:9px;padding:8px 13px;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.btn:hover{border-color:var(--acc);color:var(--acc-d)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.pri:hover{background:var(--acc-d);color:#fff}
+.btn.dng:hover{border-color:var(--err);color:var(--err)}
+.btn.sm{padding:5px 9px;font-size:11px;border-radius:7px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tabs{display:flex;gap:2px;margin-top:12px;overflow-x:auto}
+.tab{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--ink-3);border-bottom:2.5px solid transparent;white-space:nowrap;display:flex;gap:7px;align-items:center}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--acc-d);border-bottom-color:var(--acc)}
+.pill{font:700 10px var(--mono);background:#f1f5f9;color:var(--ink-3);border-radius:999px;padding:2px 7px}
+.tab.on .pill{background:var(--acc-l);color:var(--acc-d)}
+.pill.e{background:var(--err-bg);color:var(--err)}
+main{padding:20px 22px 60px;max-width:1500px;margin:0 auto}
+section{display:none}section.on{display:block}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{margin:0 0 4px;font-size:14px;font-weight:800}
+.card .sub{color:var(--ink-3);font-size:12px;margin-bottom:14px}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:26px;text-align:center;background:var(--acc-xl);transition:.15s;cursor:pointer}
+.drop.ov,.drop:hover{border-color:var(--acc);background:#e6fbf7}
+.drop b{display:block;font-size:14px;margin-bottom:4px}
+.drop span{color:var(--ink-3);font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.kpi .l{font-size:10.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font:800 22px var(--sans);margin-top:4px}
+.kpi .s{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.fld label{display:block;font-size:11px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
+.fld input,.fld select{width:100%;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font:500 13px var(--mono);background:#fff;color:var(--ink)}
+.fld input:focus,.fld select:focus{outline:2px solid var(--acc-l);border-color:var(--acc)}
+.fld small{color:var(--ink-4);font-size:10.5px}
+.row-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.struct{width:100%;border-collapse:collapse;font-size:11.5px}
+.struct td,.struct th{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.struct th{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.struct code{font:600 11px var(--mono);color:var(--acc-d)}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:600 11px var(--mono);color:var(--ink-2);margin:6px 0 2px}
+.flow span{background:#f1f5f9;border-radius:6px;padding:4px 7px}
+.flow i{color:var(--ink-4);font-style:normal}
+/* Grid */
+.tb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.tb input[type=search],.tb select{border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;font:500 12px var(--sans);min-width:220px;background:#fff}
+.tb .grow{flex:1}
+.tb .info{color:var(--ink-3);font-size:12px}
+.tw{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:calc(100vh - 250px)}
+table.g{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+table.g th{position:sticky;top:0;z-index:2;background:#f8fafc;border-bottom:1px solid var(--line);padding:0;text-align:left;white-space:nowrap}
+table.g th .hc{padding:7px 8px 6px}
+table.g th .xl{font:700 10px var(--mono);color:var(--acc-d);display:block}
+table.g th .xn{font:700 11px var(--sans);color:var(--ink-2)}
+table.g td{border-bottom:1px solid #f1f5f9;padding:0;white-space:nowrap}
+table.g td.n{font:600 10.5px var(--mono);color:var(--ink-4);text-align:right;padding:0 8px;background:#fafbfc;position:sticky;left:0}
+table.g td.ck{padding:0 6px;text-align:center}
+table.g td input{border:1px solid transparent;background:transparent;padding:6px 7px;font:500 12px var(--mono);color:var(--ink);width:100%;min-width:var(--w,110px);border-radius:5px}
+table.g td input:hover{border-color:var(--line)}
+table.g td input:focus{outline:none;border-color:var(--acc);background:#fff;box-shadow:0 0 0 3px var(--acc-l)}
+table.g td.bad input{background:var(--err-bg);border-color:#fecaca;color:var(--err)}
+table.g td.wrn input{background:var(--warn-bg);border-color:#fde68a}
+table.g tr:hover td{background:#fbfefe}
+table.g td.cnt{font:600 11px var(--mono);color:var(--ink-3);padding:0 8px}
+table.g td.cnt a{color:var(--acc-d);text-decoration:none;cursor:pointer}
+table.g td.cnt a:hover{text-decoration:underline}
+.pager{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:10px;color:var(--ink-3);font-size:12px}
+.empty{padding:40px;text-align:center;color:var(--ink-3)}
+/* Controls */
+.iss{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12.5px}
+.iss:last-child{border-bottom:0}
+.iss .tag{font:700 10px var(--mono);border-radius:5px;padding:2px 6px;flex:0 0 auto;margin-top:1px}
+.iss.e .tag{background:var(--err-bg);color:var(--err)}
+.iss.w .tag{background:var(--warn-bg);color:var(--warn)}
+.iss .loc{font:600 11px var(--mono);color:var(--acc-d);cursor:pointer;flex:0 0 auto;min-width:150px}
+.iss .loc:hover{text-decoration:underline}
+.banner{border-radius:12px;padding:14px 16px;font-weight:700;display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.banner.ok{background:var(--ok-bg);color:var(--ok);border:1px solid #a7f3d0}
+.banner.e{background:var(--err-bg);color:var(--err);border:1px solid #fecaca}
+.banner.w{background:var(--warn-bg);color:var(--warn);border:1px solid #fde68a}
+pre.xml{background:#0b1220;color:#cbd5e1;border-radius:12px;padding:16px;font:12px/1.55 var(--mono);overflow:auto;max-height:calc(100vh - 330px);margin:0}
+pre.xml .t{color:#5eead4}pre.xml .v{color:#f8fafc}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:90vw}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.muted{color:var(--ink-3)}
+.mono{font-family:var(--mono)}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="hd">
+  <div class="hd-row">
+    <div class="hd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01"/></svg></div>
+    <div>
+      <div class="hd-t">Taxes Locales · Déclaration des éléments imposables</div>
+      <div class="hd-s">Structure du classeur <span class="mono">taxe_loc_xml.xlsm</span> · génération XML EDI DGI / SIMPL (<span class="mono">DecElementImposableWrapper</span>)</div>
+    </div>
+    <div class="hd-act">
+      <button class="btn" onclick="TL.pickFile()">⇪ Importer Excel / XML</button>
+      <button class="btn" onclick="TL.exportExcel(false)">⇩ Exporter Excel</button>
+      <button class="btn pri" onclick="TL.go('xml');TL.generate()">⚙ Générer XML EDI</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-t="decl">Déclaration</button>
+    <button class="tab" data-t="etab">Établissements <span class="pill" id="c-etab">0</span></button>
+    <button class="tab" data-t="terr">Terrains <span class="pill" id="c-terr">0</span></button>
+    <button class="tab" data-t="mat">Matériel <span class="pill" id="c-mat">0</span></button>
+    <button class="tab" data-t="ret">Retraits <span class="pill" id="c-ret">0</span></button>
+    <button class="tab" data-t="ctrl">Contrôles <span class="pill" id="c-ctrl">—</span></button>
+    <button class="tab" data-t="xml">XML EDI</button>
+  </nav>
+</header>
+<input type="file" id="file" accept=".xlsx,.xlsm,.xls,.xml" hidden>
+
+<main>
+<!-- ═══════════ DÉCLARATION ═══════════ -->
+<section id="s-decl" class="on">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h3>1 · Charger les données</h3>
+        <div class="sub">Classeur Excel au format <b>taxe_loc_xml</b> (onglets Etablissements, Terrains, Materiel, Retraits) ou XML EDI déjà généré (pour le reprendre et le corriger).</div>
+        <div class="drop" id="drop" onclick="TL.pickFile()">
+          <b>Déposez le fichier ici ou cliquez pour parcourir</b>
+          <span>.xlsm · .xlsx · .xls · .xml — traitement 100 % local, aucune donnée n'est envoyée</span>
+        </div>
+        <div class="row-act">
+          <button class="btn" onclick="TL.exportExcel(true)">⇩ Modèle Excel vierge</button>
+          <button class="btn" onclick="TL.genRefs()">🔑 Générer les REF_INTERNE_LINK manquantes</button>
+          <button class="btn dng" onclick="TL.reset()">✕ Tout effacer</button>
+        </div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Structure du classeur et correspondance XML</h3>
+        <div class="sub">Reprise exacte des colonnes lues par la macro <span class="mono">GenererXML_DGI_Final_V3</span>. La liaison se fait par la clé <span class="mono">REF_INTERNE_LINK</span> (colonne K) ↔ colonne A des onglets enfants.</div>
+        <div class="flow"><span>Etablissements!K</span><i>⇄</i><span>Terrains!A</span><span>Materiel!A</span><span>Retraits!A</span><i>→</i><span>&lt;DecElementImposable&gt;</span></div>
+        <div id="struct"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>2 · En-tête de la déclaration</h3>
+        <div class="sub">Valeurs appliquées à tous les établissements (colonnes A, B, D, E, I, J). L'en-tête XML reprend l'IF et l'année de la 1<sup>re</sup> ligne.</div>
+        <div class="form">
+          <div class="fld"><label>Identifiant fiscal (IF)</label><input id="p-idf" inputmode="numeric" placeholder="ex. 1084612"></div>
+          <div class="fld"><label>Année</label><input id="p-annee" inputmode="numeric" placeholder="2025"></div>
+          <div class="fld"><label>Exercice du</label><input id="p-du" placeholder="AAAA-MM-JJ"></div>
+          <div class="fld"><label>Exercice au</label><input id="p-au" placeholder="AAAA-MM-JJ"></div>
+          <div class="fld"><label>Modificative</label><select id="p-modif"><option value="">— inchangé —</option><option value="0">0 · Déclaration initiale</option><option value="1">1 · Déclaration modificative</option></select></div>
+          <div class="fld"><label>natureDeclElemImpos (id)</label><input id="p-nature" inputmode="numeric" placeholder="ex. 1"><small>Balise omise si vide (comme la macro)</small></div>
+          <div class="fld"><label>depotDirect</label><select id="p-depot"><option value="0">0</option><option value="1">1</option></select></div>
+          <div class="fld"><label>Nom du fichier XML</label><input id="p-fname" placeholder="Declaration_DGI_Finale.xml"></div>
+        </div>
+        <div class="row-act">
+          <button class="btn pri" onclick="TL.applyHeader()">Appliquer à tous les établissements</button>
+          <button class="btn" onclick="TL.addEtab()">+ Nouvel établissement</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>3 · Contrôler puis générer</h3>
+        <div class="sub">Les contrôles signalent les lignes orphelines, clés en double, dates et montants invalides avant le dépôt sur SIMPL.</div>
+        <div id="decl-status"></div>
+        <div class="row-act">
+          <button class="btn" onclick="TL.go('ctrl')">✓ Voir les contrôles</button>
+          <button class="btn pri" onclick="TL.go('xml');TL.generate()">⚙ Générer le XML EDI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ GRILLES ═══════════ -->
+<section id="s-etab"></section>
+<section id="s-terr"></section>
+<section id="s-mat"></section>
+<section id="s-ret"></section>
+
+<!-- ═══════════ CONTRÔLES ═══════════ -->
+<section id="s-ctrl">
+  <div class="tb"><button class="btn pri" onclick="TL.renderCtrl()">↻ Relancer les contrôles</button><span class="grow"></span><select id="ctrl-f" onchange="TL.renderCtrl()"><option value="">Toutes les anomalies</option><option value="e">Erreurs bloquantes</option><option value="w">Avertissements</option></select></div>
+  <div id="ctrl-out"></div>
+</section>
+
+<!-- ═══════════ XML ═══════════ -->
+<section id="s-xml">
+  <div class="tb">
+    <button class="btn pri" onclick="TL.generate()">⚙ Générer</button>
+    <button class="btn" id="b-dl" onclick="TL.download()" disabled>⇩ Télécharger le XML</button>
+    <button class="btn" id="b-cp" onclick="TL.copy()" disabled>⧉ Copier</button>
+    <span class="grow"></span><span class="info" id="xml-info"></span>
+  </div>
+  <div id="xml-banner"></div>
+  <div class="kpis" id="xml-kpis" style="margin:0 0 12px"></div>
+  <pre class="xml" id="xml-pre">Cliquez sur « Générer » pour produire le fichier XML EDI.</pre>
+</section>
+</main>
+
+<datalist id="dl-ref"></datalist>
+<datalist id="dl-natacq"></datalist>
+<datalist id="dl-statut"></datalist>
+<datalist id="dl-desig"></datalist>
+<datalist id="dl-etat"></datalist>
+<datalist id="dl-desret"></datalist>
+<datalist id="dl-natop"></datalist>
+<datalist id="dl-01"><option value="0"><option value="1"></datalist>
+<div class="toast" id="toast"></div>
+
+<!-- ═════════════════════ MOTEUR (reprise des macros VBA) ═════════════════════ -->
+<script id="tl-engine">
+(function(G){
+'use strict';
+/* Schéma = structure exacte du classeur taxe_loc_xml.xlsm (ordre des colonnes A, B, C…) */
+const SCHEMA = {
+  etab:{sheet:'Etablissements',cols:[
+    {k:'idf',h:'identifiantFiscal',t:'id',w:90},
+    {k:'annee',h:'annee',t:'id',w:56},
+    {k:'depot',h:'depotDirect',t:'b01',w:50},
+    {k:'du',h:'exerciceFiscalDu',t:'date',w:96},
+    {k:'au',h:'exerciceFiscalAu',t:'date',w:96},
+    {k:'tp',h:'numTPLocaleDec (Clé)',t:'id',w:90},
+    {k:'tsc',h:'numTSCLocaleDec',t:'id',w:90},
+    {k:'adr',h:'adressLocaleDec',t:'text',w:260},
+    {k:'modif',h:'modificative',t:'b01',w:50},
+    {k:'nature',h:'natureDeclElemImpos',t:'id',w:50},
+    {k:'ref',h:'REF_INTERNE_LINK',t:'key',w:190}
+  ]},
+  terr:{sheet:'Terrains',cols:[
+    {k:'ref',h:'Lien_numTPLocaleDec',t:'ref',w:190},
+    {k:'nat',h:'refNatureAcquision',t:'code',dl:'dl-natacq',w:130},
+    {k:'immat',h:'estImmatricule',t:'b01',w:50},
+    {k:'tsc',h:'numTSC',t:'id',w:90},
+    {k:'tf',h:'numTF',t:'text',w:90},
+    {k:'cons',h:'consistance',t:'text',w:180},
+    {k:'sup',h:'superficie',t:'num',w:80},
+    {k:'statut',h:'refStatutPatrimonial',t:'code',dl:'dl-statut',w:120},
+    {k:'prix',h:'prixAcquision',t:'num',w:100},
+    {k:'date',h:'dateAcquisition',t:'date',w:96}
+  ]},
+  mat:{sheet:'Materiel',cols:[
+    {k:'ref',h:'Lien_numTPLocaleDec',t:'ref',w:190},
+    {k:'desig',h:'refDesignationMat',t:'code',dl:'dl-desig',w:120},
+    {k:'etat',h:'refEtatAcquision',t:'code',dl:'dl-etat',w:100},
+    {k:'statut',h:'refStatutPatrimonial',t:'code',dl:'dl-statut',w:120},
+    {k:'dacq',h:'dateAcquisition',t:'date',w:96},
+    {k:'dmes',h:'dateMiseEnService',t:'date',w:96},
+    {k:'prix',h:'prixAcquisition',t:'num',w:100}
+  ]},
+  ret:{sheet:'Retraits',cols:[
+    {k:'ref',h:'Lien_numTPLocaleDec',t:'ref',w:190},
+    {k:'desig',h:'designationRetrait',t:'code',dl:'dl-desret',w:120},
+    {k:'natop',h:'natureOperationRetrait',t:'code',dl:'dl-natop',w:110},
+    {k:'tsc',h:'numTSC',t:'id',w:90},
+    {k:'tf',h:'numTF',t:'text',w:80},
+    {k:'pacq',h:'prixAcquisition',t:'num',w:100},
+    {k:'pces',h:'prixCession',t:'num',w:100},
+    {k:'dacq',h:'dateAcquisition',t:'date',w:96},
+    {k:'dret',h:'dateRetrait',t:'date',w:96}
+  ]}
+};
+/* Codes référentiels observés dans les fichiers (saisie libre autorisée) */
+const CODES = {
+  'dl-natacq':['TERRAIN_1','AMENAGEMENT_4'],
+  'dl-statut':['PROPRIETE_1','LOCATION_2'],
+  'dl-desig':['MAT_OUTIL_5'],
+  'dl-etat':['NEUF_1'],
+  'dl-desret':['TERRAIN_1','AMENAGEMENT_4','MAT_OUTIL_5'],
+  'dl-natop':['CESSION_2']
+};
+const XML_MAP = {
+  etab:['exerciceFiscalDu ← D','exerciceFiscalAu ← E','annee ← B','numTPLocaleDec ← F','numTSCLocaleDec ← G','adressLocaleDec ← H','modificative ← I','natureDeclElemImpos/id ← J (si non vide)'],
+  terr:['refNatureAcquision/code ← B','estImmatricule ← C','numTSC ← D','numTF ← E','consistance ← F','superficie ← G','refStatutPatrimonial/code ← H','prixAcquision ← I','dateAcquisition ← J'],
+  mat:['refDesignationMat/code ← B','refEtatAcquision/code ← C','refStatutPatrimonial/code ← D','dateAcquisition ← E','dateMiseEnService ← F','prixAcquisition ← G'],
+  ret:['designationRetrait/code ← B','natureOperationRetrait/code ← C','numTSC ← D','numTF ← E','prixAcquisition ← F','prixCession ← G','dateAcquisition ← H','dateRetrait ← I']
+};
+
+function pad(n){return (n<10?'0':'')+n}
+function isoFromParts(y,m,d){return y+'-'+pad(m)+'-'+pad(d)}
+function validISO(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if(!m) return false;
+  const y=+m[1],mo=+m[2],d=+m[3]; if(mo<1||mo>12||d<1) return false;
+  return d<=new Date(Date.UTC(y,mo,0)).getUTCDate();
+}
+/* Équivalent de FormatDateXML : date Excel / texte → AAAA-MM-JJ */
+function normDate(v,SSF){
+  if(v==null||v==='') return '';
+  if(v instanceof Date && !isNaN(v)) return isoFromParts(v.getFullYear(),v.getMonth()+1,v.getDate());
+  if(typeof v==='number'){
+    if(SSF&&SSF.parse_date_code){const p=SSF.parse_date_code(v); if(p) return isoFromParts(p.y,p.m,p.d);}
+    const d=new Date(Math.round((v-25569)*864e5)); return isoFromParts(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate());
+  }
+  let s=String(v).trim();
+  let m=/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:[T ].*)?$/.exec(s);
+  if(m) return isoFromParts(+m[1],+m[2],+m[3]);
+  m=/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})(?:\s.*)?$/.exec(s);
+  if(m) return isoFromParts(+m[3],+m[2],+m[1]);
+  return s;
+}
+/* CStr() d'une valeur de cellule (15 chiffres significatifs comme VBA) */
+function cellStr(v){
+  if(v==null) return '';
+  if(typeof v==='number'){ if(!isFinite(v)) return ''; return String(parseFloat(v.toPrecision(15))); }
+  if(typeof v==='boolean') return v?'1':'0';
+  if(v instanceof Date) return normDate(v);
+  return String(v).trim();
+}
+/* CleanVal : trim, retire « .0 », échappe les caractères XML (& < > " ') */
+const XERR=/^#(VALUE!|VALEUR!|REF!|N\/A|NAME\?|NOM\?|DIV\/0!|NUM!|NOMBRE!|NULL!|NUL!|ERREUR)/;
+function cleanVal(v){
+  let t=v==null?'':String(v).trim();
+  if(XERR.test(t)) t=''; /* une cellule en erreur n'est jamais écrite dans le XML */
+  if(t.slice(-2)==='.0') t=t.slice(0,-2);
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+/* Montants : Replace(",", ".") de la macro + suppression des espaces de milliers */
+function numVal(v){ return cleanVal(String(v==null?'':v).replace(/[\s  ]/g,'')).replace(/,/g,'.'); }
+function dateVal(v){ return cleanVal(normDate(v)); }
+
+/* GenererSuffixe(4) + unicité (Module1) */
+const CH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function suffix(n){let s='';for(let i=0;i<n;i++)s+=CH[Math.floor(Math.random()*CH.length)];return s}
+function makeRef(tp,tsc,used){
+  const base=(String(tp||'').trim()||'0')+'-'+(String(tsc||'').trim()||'0');
+  let r; do{ r=base+'-'+suffix(4);}while(used.has(r)); used.add(r); return r;
+}
+
+function emptyState(){return {etab:[],terr:[],mat:[],ret:[]}}
+function blankRow(kind){const o={};SCHEMA[kind].cols.forEach(c=>o[c.k]='');return o}
+
+function normSheetName(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'')}
+/* Lecture positionnelle des onglets (colonnes A.., données à partir de la ligne 2) — comme la macro */
+function readWorkbook(wb,XLSX){
+  const st=emptyState(), SSF=XLSX.SSF, found=[];
+  const names={}; wb.SheetNames.forEach(n=>names[normSheetName(n)]=n);
+  for(const kind of Object.keys(SCHEMA)){
+    const sc=SCHEMA[kind], name=names[normSheetName(sc.sheet)];
+    if(!name) continue; found.push(sc.sheet);
+    const ws=wb.Sheets[name]; if(!ws||!ws['!ref']) continue;
+    const rg=XLSX.utils.decode_range(ws['!ref']);
+    for(let r=1;r<=rg.e.r;r++){
+      const o={}; let any=false; const from=kind==='etab'?3:1; /* ignore les lignes de modèle (seuls IF/année/dépôt ou la clé remplis) */
+      sc.cols.forEach((c,ci)=>{
+        const cell=ws[XLSX.utils.encode_cell({r,c:ci})];
+        let v=cell?cell.v:null;
+        const s=cell&&cell.t==='e'?(cell.w||'#ERREUR'):c.t==='date'?normDate(v,SSF):cellStr(v);
+        o[c.k]=s; if(s!==''&&ci>=from) any=true;
+      });
+      if(any) st[kind].push(o);
+    }
+  }
+  if(!found.length) throw new Error("Aucun onglet reconnu (Etablissements, Terrains, Materiel, Retraits).");
+  return {state:st,found};
+}
+
+/* Reprise d'un XML EDI existant (DecElementImposableWrapper) */
+function readXml(text,DP){
+  const doc=new DP().parseFromString(text,'application/xml');
+  if(doc.getElementsByTagName('parsererror').length) throw new Error('XML mal formé : '+doc.getElementsByTagName('parsererror')[0].textContent.slice(0,160));
+  const root=doc.documentElement;
+  if(root.nodeName!=='DecElementImposableWrapper') throw new Error('Racine attendue : DecElementImposableWrapper (trouvé : '+root.nodeName+')');
+  const kid=(el,name)=>{for(const c of el.children) if(c.nodeName===name) return c; return null};
+  const txt=(el,path)=>{let cur=el;for(const p of path.split('/')){cur=cur&&kid(cur,p);} return cur?cur.textContent.trim():''};
+  const list=(el,l,i)=>{const L=kid(el,l);return L?[...L.children].filter(c=>c.nodeName===i):[]};
+  const st=emptyState(), used=new Set();
+  const idf=txt(root,'identifiantFiscal'), depot=txt(root,'depotDirect')||'0';
+  const decs=list(root,'listDecElementImposable','DecElementImposable');
+  for(const d of decs){
+    const tp=txt(d,'numTPLocaleDec'), tsc=txt(d,'numTSCLocaleDec'), ref=makeRef(tp,tsc,used);
+    st.etab.push({idf,annee:txt(d,'annee')||txt(root,'annee'),depot,du:txt(d,'exerciceFiscalDu'),au:txt(d,'exerciceFiscalAu'),
+      tp,tsc,adr:txt(d,'adressLocaleDec'),modif:txt(d,'modificative'),nature:txt(d,'natureDeclElemImpos/id'),ref});
+    for(const t of list(d,'listAcquisitionOuLocationTerrain','AcquisitionOuLocationTerrain'))
+      st.terr.push({ref,nat:txt(t,'refNatureAcquision/code'),immat:txt(t,'estImmatricule'),tsc:txt(t,'numTSC'),tf:txt(t,'numTF'),
+        cons:txt(t,'consistance'),sup:txt(t,'superficie'),statut:txt(t,'refStatutPatrimonial/code'),prix:txt(t,'prixAcquision'),date:txt(t,'dateAcquisition')});
+    for(const m of list(d,'listAcquisitionOuLocationMateriel','AcquisitionOuLocationMateriel'))
+      st.mat.push({ref,desig:txt(m,'refDesignationMat/code'),etat:txt(m,'refEtatAcquision/code'),statut:txt(m,'refStatutPatrimonial/code'),
+        dacq:txt(m,'dateAcquisition'),dmes:txt(m,'dateMiseEnService'),prix:txt(m,'prixAcquisition')});
+    for(const r of list(d,'listRetraits','Retraits'))
+      st.ret.push({ref,desig:txt(r,'designationRetrait/code'),natop:txt(r,'natureOperationRetrait/code'),tsc:txt(r,'numTSC'),tf:txt(r,'numTF'),
+        pacq:txt(r,'prixAcquisition'),pces:txt(r,'prixCession'),dacq:txt(r,'dateAcquisition'),dret:txt(r,'dateRetrait')});
+  }
+  return {state:st,found:['XML : '+decs.length+' établissement(s)']};
+}
+
+function groupBy(rows){const m=new Map();for(const r of rows){const k=String(r.ref||'').trim();if(!m.has(k))m.set(k,[]);m.get(k).push(r)}return m}
+
+/* ═══ GenererXML_DGI_Final_V3 — sortie identique (indentation, CRLF, UTF-8 sans BOM) ═══ */
+function buildXml(st){
+  const NL='\r\n', out=[], w=s=>out.push(s+NL);
+  const first=st.etab[0]||{};
+  const T=groupBy(st.terr),M=groupBy(st.mat),R=groupBy(st.ret);
+  const stats={etab:0,terr:0,mat:0,ret:0,prixTerr:0,prixMat:0,prixRet:0,cession:0,skipped:0};
+  const add=(k,v)=>{const n=parseFloat(String(v).replace(/[\s ]/g,'').replace(',','.'));if(isFinite(n))stats[k]+=n};
+  w('<?xml version="1.0" encoding="UTF-8"?>');
+  w('<DecElementImposableWrapper>');
+  w('  <identifiantFiscal>'+cleanVal(first.idf)+'</identifiantFiscal>');
+  w('  <annee>'+cleanVal(first.annee)+'</annee>');
+  w('  <depotDirect>'+(cleanVal(first.depot)==='1'?'1':'0')+'</depotDirect>');
+  w('  <listDecElementImposable>');
+  for(const e of st.etab){
+    const key=String(e.ref||'').trim();
+    if(!key){stats.skipped++;continue}
+    stats.etab++;
+    w('    <DecElementImposable>');
+    w('      <exerciceFiscalDu>'+dateVal(e.du)+'</exerciceFiscalDu>');
+    w('      <exerciceFiscalAu>'+dateVal(e.au)+'</exerciceFiscalAu>');
+    w('      <annee>'+cleanVal(e.annee)+'</annee>');
+    w('      <numTPLocaleDec>'+cleanVal(e.tp)+'</numTPLocaleDec>');
+    w('      <numTSCLocaleDec>'+cleanVal(e.tsc)+'</numTSCLocaleDec>');
+    w('      <adressLocaleDec>'+cleanVal(e.adr)+'</adressLocaleDec>');
+    w('      <modificative>'+cleanVal(e.modif)+'</modificative>');
+    const nat=cleanVal(e.nature);
+    if(nat!==''){w('      <natureDeclElemImpos>');w('        <id>'+nat+'</id>');w('      </natureDeclElemImpos>')}
+    w('      <listAcquisitionOuLocationTerrain>');
+    for(const t of (T.get(key)||[])){
+      stats.terr++;add('prixTerr',t.prix);
+      w('        <AcquisitionOuLocationTerrain>');
+      w('          <refNatureAcquision>');w('            <code>'+cleanVal(t.nat)+'</code>');w('          </refNatureAcquision>');
+      w('          <estImmatricule>'+cleanVal(t.immat)+'</estImmatricule>');
+      w('          <numTSC>'+cleanVal(t.tsc)+'</numTSC>');
+      w('          <numTF>'+cleanVal(t.tf)+'</numTF>');
+      w('          <consistance>'+cleanVal(t.cons)+'</consistance>');
+      w('          <superficie>'+numVal(t.sup)+'</superficie>');
+      w('          <refStatutPatrimonial>');w('            <code>'+cleanVal(t.statut)+'</code>');w('          </refStatutPatrimonial>');
+      w('          <prixAcquision>'+numVal(t.prix)+'</prixAcquision>');
+      w('          <dateAcquisition>'+dateVal(t.date)+'</dateAcquisition>');
+      w('        </AcquisitionOuLocationTerrain>');
+    }
+    w('      </listAcquisitionOuLocationTerrain>');
+    w('      <listAcquisitionOuLocationMateriel>');
+    for(const m of (M.get(key)||[])){
+      stats.mat++;add('prixMat',m.prix);
+      w('        <AcquisitionOuLocationMateriel>');
+      w('          <refDesignationMat>');w('            <code>'+cleanVal(m.desig)+'</code>');w('          </refDesignationMat>');
+      w('          <refEtatAcquision>');w('            <code>'+cleanVal(m.etat)+'</code>');w('          </refEtatAcquision>');
+      w('          <refStatutPatrimonial>');w('            <code>'+cleanVal(m.statut)+'</code>');w('          </refStatutPatrimonial>');
+      w('          <dateAcquisition>'+dateVal(m.dacq)+'</dateAcquisition>');
+      w('          <dateMiseEnService>'+dateVal(m.dmes)+'</dateMiseEnService>');
+      w('          <prixAcquisition>'+numVal(m.prix)+'</prixAcquisition>');
+      w('        </AcquisitionOuLocationMateriel>');
+    }
+    w('      </listAcquisitionOuLocationMateriel>');
+    w('      <listRetraits>');
+    for(const r of (R.get(key)||[])){
+      stats.ret++;add('prixRet',r.pacq);add('cession',r.pces);
+      w('        <Retraits>');
+      w('          <designationRetrait>');w('            <code>'+cleanVal(r.desig)+'</code>');w('          </designationRetrait>');
+      w('          <natureOperationRetrait>');w('            <code>'+cleanVal(r.natop)+'</code>');w('          </natureOperationRetrait>');
+      w('          <numTSC>'+cleanVal(r.tsc)+'</numTSC>');
+      w('          <numTF>'+cleanVal(r.tf)+'</numTF>');
+      w('          <prixAcquisition>'+numVal(r.pacq)+'</prixAcquisition>');
+      w('          <prixCession>'+numVal(r.pces)+'</prixCession>');
+      w('          <dateAcquisition>'+dateVal(r.dacq)+'</dateAcquisition>');
+      w('          <dateRetrait>'+dateVal(r.dret)+'</dateRetrait>');
+      w('        </Retraits>');
+    }
+    w('      </listRetraits>');
+    w('    </DecElementImposable>');
+  }
+  w('  </listDecElementImposable>');
+  out.push('</DecElementImposableWrapper>');
+  return {xml:out.join(''),stats};
+}
+
+/* ═══ Contrôles de cohérence avant dépôt SIMPL ═══ */
+function validate(st){
+  const iss=[], cells={};
+  const P=(sev,kind,i,col,msg)=>{iss.push({sev,kind,i,col,msg}); if(i!=null&&col){const k=kind+':'+i+':'+col; if(!cells[k]||sev==='e')cells[k]=sev;}};
+  const isNum=v=>{const s=String(v).replace(/[\s  ]/g,'').replace(',','.');return s!==''&&/^-?\d+(\.\d+)?$/.test(s)};
+  const isDigits=v=>/^\d+$/.test(String(v).trim().replace(/\.0$/,''));
+  const codeOk=v=>/^[A-Z][A-Z0-9_]*_\d+$/.test(String(v).trim());
+  if(!st.etab.length) P('e','etab',null,null,'Aucun établissement saisi.');
+  for(const kind of Object.keys(SCHEMA)) st[kind].forEach((o,i)=>SCHEMA[kind].cols.forEach(c=>{if(XERR.test(String(o[c.k]||'')))P('e',kind,i,c.k,'Cellule Excel en erreur ('+o[c.k]+') : corrigez la formule ou la valeur.')}));
+  const refs=new Map();
+  st.etab.forEach((e,i)=>{
+    const r=String(e.ref||'').trim();
+    if(!r) P('w','etab',i,'ref','REF_INTERNE_LINK vide : établissement ignoré à la génération (utilisez « Générer les REF manquantes »).');
+    else if(refs.has(r)) P('e','etab',i,'ref','REF_INTERNE_LINK en double (ligne '+(refs.get(r)+2)+') : les biens seraient dupliqués.');
+    else refs.set(r,i);
+    if(!String(e.idf).trim()) P('e','etab',i,'idf','Identifiant fiscal vide.');
+    else if(!isDigits(e.idf)) P('e','etab',i,'idf','Identifiant fiscal non numérique.');
+    if(i>0&&st.etab[0].idf&&String(e.idf).trim()!==String(st.etab[0].idf).trim()) P('w','etab',i,'idf','IF différent de la 1re ligne (seul celui de la 1re ligne est déclaré en en-tête).');
+    if(!/^\d{4}$/.test(String(e.annee).trim().replace(/\.0$/,''))) P('e','etab',i,'annee','Année invalide (AAAA attendu).');
+    ['du','au'].forEach(c=>{if(!validISO(normDate(e[c]))) P('e','etab',i,c,'Date d\'exercice invalide (AAAA-MM-JJ).')});
+    if(validISO(normDate(e.du))&&validISO(normDate(e.au))&&normDate(e.du)>normDate(e.au)) P('e','etab',i,'au','Exercice : date de fin antérieure à la date de début.');
+    if(!String(e.tp).trim()) P('e','etab',i,'tp','N° TP (numTPLocaleDec) vide.');
+    else if(!isDigits(e.tp)) P('w','etab',i,'tp','N° TP non numérique.');
+    if(String(e.tsc).trim()&&!isDigits(e.tsc)) P('w','etab',i,'tsc','N° TSC non numérique.');
+    if(!String(e.adr).trim()) P('w','etab',i,'adr','Adresse du local vide.');
+    if(!/^[01]$/.test(String(e.modif).trim().replace(/\.0$/,''))) P('e','etab',i,'modif','modificative doit valoir 0 ou 1.');
+    if(String(e.nature).trim()&&!isDigits(e.nature)) P('e','etab',i,'nature','natureDeclElemImpos : identifiant numérique attendu.');
+  });
+  const exo=new Map(); st.etab.forEach(e=>{const r=String(e.ref||'').trim(); if(r) exo.set(r,e)});
+  const child=(kind,req,dates,nums,codes)=>{
+    st[kind].forEach((o,i)=>{
+      const r=String(o.ref||'').trim();
+      if(!r) P('e',kind,i,'ref','Code liaison vide : ligne non exportée.');
+      else if(XERR.test(r)) {} /* déjà signalé comme cellule en erreur */
+      else if(!exo.has(r)) P('e',kind,i,'ref','Code liaison inconnu (aucun établissement « '+r+' ») : ligne non exportée.');
+      req.forEach(c=>{if(!String(o[c]==null?'':o[c]).trim()) P('e',kind,i,c,'Champ obligatoire vide.')});
+      codes.forEach(c=>{const v=String(o[c]||'').trim(); if(v&&!codeOk(v)) P('w',kind,i,c,'Code référentiel inhabituel « '+v+' » (format CODE_n attendu).')});
+      dates.forEach(c=>{const v=o[c]; if(String(v||'').trim()&&!validISO(normDate(v))) P('e',kind,i,c,'Date invalide (AAAA-MM-JJ).')});
+      nums.forEach(c=>{const v=o[c]; if(String(v==null?'':v).trim()&&!isNum(v)) P('e',kind,i,c,'Montant / nombre invalide.')});
+      ['immat'].forEach(c=>{if(c in o&&String(o[c]).trim()&&!/^[01]$/.test(String(o[c]).trim())) P('e',kind,i,c,'Valeur 0 ou 1 attendue.')});
+    });
+  };
+  child('terr',['nat','immat','statut','prix','date'],['date'],['sup','prix'],['nat','statut']);
+  child('mat',['desig','etat','statut','dacq','dmes','prix'],['dacq','dmes'],['prix'],['desig','etat','statut']);
+  child('ret',['desig','natop','pacq','dacq','dret'],['dacq','dret'],['pacq','pces'],['desig','natop']);
+  st.mat.forEach((m,i)=>{const a=normDate(m.dacq),b=normDate(m.dmes); if(validISO(a)&&validISO(b)&&b<a) P('w','mat',i,'dmes','Mise en service antérieure à l\'acquisition.')});
+  st.ret.forEach((r,i)=>{
+    const a=normDate(r.dacq),b=normDate(r.dret); if(validISO(a)&&validISO(b)&&b<a) P('e','ret',i,'dret','Date de retrait antérieure à l\'acquisition.');
+    const e=exo.get(String(r.ref||'').trim()); if(e&&validISO(b)){const du=normDate(e.du),au=normDate(e.au); if(validISO(du)&&validISO(au)&&(b<du||b>au)) P('w','ret',i,'dret','Retrait hors de l\'exercice déclaré ('+du+' → '+au+').')}
+  });
+  ['terr','mat'].forEach(kind=>{const dc=kind==='terr'?'date':'dacq';st[kind].forEach((o,i)=>{const e=exo.get(String(o.ref||'').trim());const d=normDate(o[dc]);if(e&&validISO(d)){const au=normDate(e.au);if(validISO(au)&&d>au)P('w',kind,i,dc,'Acquisition postérieure à la fin de l\'exercice ('+au+').')}})});
+  const nE=iss.filter(x=>x.sev==='e').length;
+  return {issues:iss,cells,errors:nE,warnings:iss.length-nE};
+}
+
+G.TLEngine={SCHEMA,CODES,XML_MAP,normDate,cellStr,cleanVal,numVal,validISO,makeRef,emptyState,blankRow,readWorkbook,readXml,buildXml,validate,groupBy};
+})(typeof window!=='undefined'?window:globalThis);
+</script>
+
+<!-- ═════════════════════ INTERFACE ═════════════════════ -->
+<script id="tl-ui">
+(function(){
+'use strict';
+const E=window.TLEngine, S=E.SCHEMA;
+const KEY='FISCOMA_TAXLOC9_V1', PAGE=60;
+let st=E.emptyState(), val=null, lastXml=null, cur='decl';
+const view={etab:{q:'',p:0,f:''},terr:{q:'',p:0,f:''},mat:{q:'',p:0,f:''},ret:{q:'',p:0,f:''}};
+const LABEL={etab:'Établissements',terr:'Terrains',mat:'Matériel',ret:'Retraits'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmt=n=>(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),ms||2600)}
+
+/* ── SheetJS : réutilise celui du Command Center, sinon CDN ── */
+let XLSXp=null;
+function getXLSX(){
+  if(XLSXp) return XLSXp;
+  XLSXp=new Promise((res,rej)=>{
+    try{ if(window.parent&&window.parent!==window&&window.parent.XLSX&&window.parent.XLSX.SSF&&window.parent.XLSX.write) return res(window.parent.XLSX);}catch(_){}
+    if(window.XLSX&&window.XLSX.SSF) return res(window.XLSX);
+    const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>res(window.XLSX); s.onerror=()=>{XLSXp=null;rej(new Error('Bibliothèque Excel (SheetJS) indisponible : vérifiez la connexion.'))};
+    document.head.appendChild(s);
+  });
+  return XLSXp;
+}
+
+/* ── Persistance locale ── */
+let saveH=null;
+function save(){clearTimeout(saveH);saveH=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify({v:1,st,fname:$('p-fname').value}))}catch(_){}},400)}
+function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&o.st){st=Object.assign(E.emptyState(),o.st);$('p-fname').value=o.fname||''}}catch(_){}}
+
+/* ── Navigation ── */
+function go(t){
+  cur=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));
+  if(S[t]) renderGrid(t);
+  if(t==='ctrl') renderCtrl();
+  if(t==='decl') renderDecl();
+  window.scrollTo(0,0);
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)go(b.dataset.t)});
+
+function revalidate(){val=E.validate(st);const c=$('c-ctrl');c.textContent=val.errors?val.errors+' err.':(val.warnings?val.warnings+' av.':'OK');c.classList.toggle('e',val.errors>0);return val}
+function counts(){for(const k of Object.keys(S))$('c-'+k).textContent=st[k].length}
+function refreshLists(){
+  const used=new Map();
+  st.etab.forEach(e=>{const r=String(e.ref||'').trim();if(r)used.set(r,e.adr||'')});
+  $('dl-ref').innerHTML=[...used].map(([r,a])=>'<option value="'+esc(r)+'">'+esc(a)+'</option>').join('');
+  for(const [id,base] of Object.entries(E.CODES)){
+    const set=new Set(base);
+    for(const kind of ['terr','mat','ret'])S[kind].cols.forEach(c=>{if(c.dl===id)st[kind].forEach(o=>{const v=String(o[c.k]||'').trim();if(v)set.add(v)})});
+    $(id).innerHTML=[...set].map(v=>'<option value="'+esc(v)+'">').join('');
+  }
+}
+function changed(){counts();revalidate();save();lastXml=null;$('b-dl').disabled=true;$('b-cp').disabled=true}
+
+/* ── Écran Déclaration ── */
+function renderDecl(){
+  const v=val||revalidate();
+  const b=E.buildXml(st).stats;
+  const childCount=new Map();
+  ['terr','mat','ret'].forEach(k=>st[k].forEach(o=>{const r=String(o.ref||'').trim();childCount.set(r,(childCount.get(r)||0)+1)}));
+  const refs=new Set(st.etab.map(e=>String(e.ref||'').trim()).filter(Boolean));
+  let orph=0; childCount.forEach((n,r)=>{if(!refs.has(r))orph+=n});
+  $('kpis').innerHTML=[
+    ['Établissements',st.etab.length,b.skipped?b.skipped+' sans REF (ignorés)':'TP / TSC déclarés'],
+    ['Terrains & aménag.',st.terr.length,fmt(b.prixTerr)+' DH'],
+    ['Matériel & outillage',st.mat.length,fmt(b.prixMat)+' DH'],
+    ['Retraits',st.ret.length,orph?orph+' ligne(s) orpheline(s)':'cessions : '+fmt(b.cession)+' DH']
+  ].map(([l,n,s])=>'<div class="kpi"><div class="l">'+l+'</div><div class="v">'+n.toLocaleString('fr-FR')+'</div><div class="s">'+esc(s)+'</div></div>').join('');
+  $('decl-status').innerHTML=!st.etab.length?'<div class="banner w">⚠ Aucune donnée : importez le classeur ou saisissez un établissement.</div>'
+    :v.errors?'<div class="banner e">✕ '+v.errors+' erreur(s) bloquante(s) · '+v.warnings+' avertissement(s)</div>'
+    :'<div class="banner ok">✓ Prêt pour la génération'+(v.warnings?' · '+v.warnings+' avertissement(s)':'')+'</div>';
+  const f=st.etab[0];
+  if(f&&!document.activeElement.closest?.('.form')){
+    $('p-idf').value=f.idf||'';$('p-annee').value=f.annee||'';$('p-du').value=E.normDate(f.du)||'';$('p-au').value=E.normDate(f.au)||'';
+    $('p-nature').value=f.nature||'';$('p-depot').value=f.depot==='1'?'1':'0';
+  }
+}
+function renderStruct(){
+  $('struct').innerHTML='<table class="struct"><tr><th>Onglet</th><th>Colonnes (A → …)</th><th>Balises XML</th></tr>'+
+    Object.entries(S).map(([k,sc])=>'<tr><td><b>'+sc.sheet+'</b></td><td>'+sc.cols.map((c,i)=>'<code>'+String.fromCharCode(65+i)+'</code> '+esc(c.h)).join('<br>')+'</td><td class="muted">'+E.XML_MAP[k].map(esc).join('<br>')+'</td></tr>').join('')+'</table>';
+}
+
+/* ── Grilles éditables (même structure que les onglets Excel) ── */
+function rowsFor(kind){
+  const v=view[kind], q=v.q.trim().toLowerCase(), cols=S[kind].cols;
+  const out=[];
+  st[kind].forEach((o,i)=>{
+    if(v.f){
+      if(v.f==='__err'){ if(!val||!cols.some(c=>val.cells[kind+':'+i+':'+c.k]))return; }
+      else if(String(o.ref||'').trim()!==v.f) return;
+    }
+    if(q&&!cols.some(c=>String(o[c.k]||'').toLowerCase().includes(q)))return;
+    out.push(i);
+  });
+  return out;
+}
+function renderGrid(kind){
+  if(!val)revalidate();
+  const sec=$('s-'+kind), cols=S[kind].cols, v=view[kind];
+  const idx=rowsFor(kind), pages=Math.max(1,Math.ceil(idx.length/PAGE)); if(v.p>=pages)v.p=pages-1;
+  const slice=idx.slice(v.p*PAGE,v.p*PAGE+PAGE);
+  let cnt=null;
+  if(kind==='etab'){cnt={};['terr','mat','ret'].forEach(k=>{const g=E.groupBy(st[k]);cnt[k]=g})}
+  const refOpts=kind!=='etab'?'<option value="">Tous les établissements</option>'+st.etab.filter(e=>String(e.ref||'').trim()).map(e=>'<option value="'+esc(e.ref)+'"'+(v.f===e.ref?' selected':'')+'>'+esc(e.tp+' · '+(e.adr||'').slice(0,40))+'</option>').join(''):'';
+  sec.innerHTML=
+    '<div class="tb">'+
+      '<input type="search" placeholder="Rechercher dans '+LABEL[kind]+'…" value="'+esc(v.q)+'" data-act="q">'+
+      (kind!=='etab'?'<select data-act="f">'+refOpts+'<option value="__err"'+(v.f==='__err'?' selected':'')+'>⚠ Lignes en anomalie</option></select>':'<select data-act="f"><option value="">Toutes les lignes</option><option value="__err"'+(v.f==='__err'?' selected':'')+'>⚠ Lignes en anomalie</option></select>')+
+      '<button class="btn pri sm" data-act="add">+ Ajouter une ligne</button>'+
+      '<button class="btn sm dng" data-act="del">Supprimer la sélection</button>'+
+      (kind==='etab'?'<button class="btn sm" data-act="refs">🔑 REF manquantes</button>':'')+
+      '<span class="grow"></span><span class="info">'+idx.length.toLocaleString('fr-FR')+' ligne(s) · onglet Excel « '+S[kind].sheet+' »</span>'+
+    '</div>'+
+    (st[kind].length?
+    '<div class="tw"><table class="g"><thead><tr><th><div class="hc">#</div></th><th><div class="hc"><input type="checkbox" data-act="all"></div></th>'+
+      cols.map((c,i)=>'<th><div class="hc"><span class="xl">'+String.fromCharCode(65+i)+'</span><span class="xn">'+esc(c.h)+'</span></div></th>').join('')+
+      (kind==='etab'?'<th><div class="hc"><span class="xl">liés</span><span class="xn">Terr. · Mat. · Retr.</span></div></th>':'')+
+    '</tr></thead><tbody>'+
+      slice.map(i=>{
+        const o=st[kind][i];
+        return '<tr data-i="'+i+'"><td class="n">'+(i+2)+'</td><td class="ck"><input type="checkbox" class="sel"></td>'+
+          cols.map(c=>{
+            const s=val&&val.cells[kind+':'+i+':'+c.k];
+            const list=c.t==='ref'?'dl-ref':c.dl||(c.t==='b01'?'dl-01':'');
+            const ph=c.t==='date'?' placeholder="AAAA-MM-JJ"':'';
+            return '<td class="'+(s==='e'?'bad':s==='w'?'wrn':'')+'"><input data-k="'+c.k+'" style="--w:'+(c.w||110)+'px" value="'+esc(o[c.k])+'"'+(list?' list="'+list+'"':'')+ph+(c.t==='key'?' title="Clé de liaison (colonne K)"':'')+'></td>';
+          }).join('')+
+          (cnt?(()=>{const r=String(o.ref||'').trim();const n=k=>(r&&cnt[k].get(r)||[]).length;return '<td class="cnt">'+['terr','mat','ret'].map(k=>n(k)?'<a data-go="'+k+'">'+n(k)+'</a>':'0').join(' · ')+'</td>'})():'')+
+        '</tr>';
+      }).join('')+
+    '</tbody></table></div>'+
+    '<div class="pager"><button class="btn sm" data-act="prev"'+(v.p?'':' disabled')+'>‹</button>Page '+(v.p+1)+' / '+pages+'<button class="btn sm" data-act="next"'+(v.p<pages-1?'':' disabled')+'>›</button></div>'
+    :'<div class="tw"><div class="empty">Aucune ligne. Importez le classeur Excel ou cliquez sur « Ajouter une ligne ».</div></div>');
+}
+function bindGrid(kind){
+  const sec=$('s-'+kind);
+  sec.addEventListener('input',e=>{
+    const t=e.target;
+    if(t.dataset.act==='q'){view[kind].q=t.value;view[kind].p=0;clearTimeout(t._h);t._h=setTimeout(()=>{renderGrid(kind);const n=sec.querySelector('[data-act=q]');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250);return}
+    if(t.dataset.k){
+      const i=+t.closest('tr').dataset.i, c=t.dataset.k;
+      const old=st[kind][i][c]; st[kind][i][c]=t.value;
+      if(kind==='etab'&&c==='ref'&&old&&old!==t.value){ /* propage le renommage de clé aux onglets enfants */
+        ['terr','mat','ret'].forEach(k=>st[k].forEach(o=>{if(String(o.ref).trim()===String(old).trim())o.ref=t.value}));
+      }
+      changed();
+      const s=val.cells[kind+':'+i+':'+c]; const td=t.parentElement; td.className=s==='e'?'bad':s==='w'?'wrn':'';
+    }
+  });
+  sec.addEventListener('change',e=>{
+    const t=e.target;
+    if(t.dataset.act==='f'){view[kind].f=t.value;view[kind].p=0;renderGrid(kind)}
+    else if(t.dataset.act==='all'){sec.querySelectorAll('.sel').forEach(x=>x.checked=t.checked)}
+    else if(t.dataset.k){if(kind==='etab'&&t.dataset.k==='ref')refreshLists();if(S[kind].cols.find(c=>c.k===t.dataset.k).t==='date'){const n=E.normDate(t.value);if(n!==t.value){t.value=n;st[kind][+t.closest('tr').dataset.i][t.dataset.k]=n;changed()}}}
+  });
+  sec.addEventListener('click',e=>{
+    const a=e.target.closest('[data-act],[data-go]'); if(!a)return;
+    if(a.dataset.go){const r=st.etab[+a.closest('tr').dataset.i].ref;view[a.dataset.go].f=String(r).trim();view[a.dataset.go].q='';view[a.dataset.go].p=0;go(a.dataset.go);return}
+    const act=a.dataset.act;
+    if(act==='prev'){view[kind].p--;renderGrid(kind)}
+    else if(act==='next'){view[kind].p++;renderGrid(kind)}
+    else if(act==='add'){addRow(kind)}
+    else if(act==='refs'){genRefs()}
+    else if(act==='del'){
+      const ids=[...sec.querySelectorAll('.sel:checked')].map(x=>+x.closest('tr').dataset.i);
+      if(!ids.length)return toast('Cochez les lignes à supprimer.');
+      let msg='Supprimer '+ids.length+' ligne(s) de « '+LABEL[kind]+' » ?';
+      if(kind==='etab')msg+='\nLes terrains, matériels et retraits liés seront aussi supprimés.';
+      if(!confirm(msg))return;
+      const set=new Set(ids);
+      if(kind==='etab'){const refs=new Set(ids.map(i=>String(st.etab[i].ref||'').trim()).filter(Boolean));['terr','mat','ret'].forEach(k=>st[k]=st[k].filter(o=>!refs.has(String(o.ref||'').trim())))}
+      st[kind]=st[kind].filter((_,i)=>!set.has(i));
+      changed();refreshLists();renderGrid(kind);toast(ids.length+' ligne(s) supprimée(s).');
+    }
+  });
+}
+function addRow(kind){
+  const o=E.blankRow(kind);
+  if(kind==='etab'){
+    const f=st.etab[0]||{};
+    Object.assign(o,{idf:f.idf||'',annee:f.annee||String(new Date().getFullYear()-1),depot:f.depot||'0',du:f.du||'',au:f.au||'',modif:f.modif||'0',nature:f.nature||''});
+    if(!o.du&&o.annee){o.du=o.annee+'-01-01';o.au=o.annee+'-12-31'}
+    o.ref=E.makeRef('','',new Set(st.etab.map(e=>e.ref)));
+  }else{
+    o.ref=view[kind].f&&view[kind].f!=='__err'?view[kind].f:'';
+    if(kind==='terr'){o.immat='1';o.sup='0';o.tsc='0';o.tf='0'}
+    if(kind==='ret'){o.tf='0'}
+  }
+  st[kind].push(o); changed(); refreshLists();
+  view[kind].q='';const idx=rowsFor(kind);view[kind].p=Math.max(0,Math.ceil(idx.length/PAGE)-1);
+  if(cur!==kind)go(kind);else renderGrid(kind);
+  const last=$('s-'+kind).querySelector('tr[data-i="'+(st[kind].length-1)+'"] input[data-k]'); if(last)last.focus();
+}
+function addEtab(){addRow('etab')}
+
+/* Module1 — GenererCodeRepereEnColonneK (uniquement pour les lignes sans clé, pour ne pas casser les liaisons) */
+function genRefs(){
+  const used=new Set(st.etab.map(e=>String(e.ref||'').trim()).filter(Boolean));let n=0;
+  st.etab.forEach(e=>{if(!String(e.ref||'').trim()){e.ref=E.makeRef(e.tp,e.tsc,used);n++}});
+  changed();refreshLists();if(S[cur])renderGrid(cur);else if(cur==='decl')renderDecl();
+  toast(n?n+' clé(s) REF_INTERNE_LINK générée(s).':'Toutes les lignes ont déjà une clé.');
+}
+function applyHeader(){
+  if(!st.etab.length)return toast('Aucun établissement : ajoutez-en ou importez le classeur.');
+  const p={idf:$('p-idf').value.trim(),annee:$('p-annee').value.trim(),du:E.normDate($('p-du').value),au:E.normDate($('p-au').value),modif:$('p-modif').value,nature:$('p-nature').value.trim(),depot:$('p-depot').value};
+  st.etab.forEach(e=>{if(p.idf)e.idf=p.idf;if(p.annee)e.annee=p.annee;if(p.du)e.du=p.du;if(p.au)e.au=p.au;if(p.modif!=='')e.modif=p.modif;e.nature=p.nature;e.depot=p.depot});
+  changed();renderDecl();toast('En-tête appliqué à '+st.etab.length+' établissement(s).');
+}
+
+/* ── Contrôles ── */
+function renderCtrl(){
+  const v=revalidate(), f=$('ctrl-f').value;
+  const list=v.issues.filter(x=>!f||x.sev===f);
+  const head=v.errors?'<div class="banner e">✕ '+v.errors+' erreur(s) bloquante(s) · '+v.warnings+' avertissement(s)</div>'
+    :v.warnings?'<div class="banner w">✓ Aucune erreur bloquante · '+v.warnings+' avertissement(s) à vérifier</div>'
+    :'<div class="banner ok">✓ Aucune anomalie détectée — le fichier est prêt pour SIMPL.</div>';
+  const MAX=400;
+  $('ctrl-out').innerHTML=head+(list.length?'<div class="card" style="padding:0">'+list.slice(0,MAX).map((x,j)=>{
+    const col=x.col?S[x.kind].cols.findIndex(c=>c.k===x.col):-1;
+    const loc=x.i==null?LABEL[x.kind]:S[x.kind].sheet+'!'+(col>=0?String.fromCharCode(65+col):'')+(x.i+2);
+    return '<div class="iss '+x.sev+'"><span class="tag">'+(x.sev==='e'?'ERREUR':'AVERT.')+'</span><span class="loc" data-j="'+j+'">'+esc(loc)+(col>=0?' · '+esc(S[x.kind].cols[col].h):'')+'</span><span>'+esc(x.msg)+'</span></div>';
+  }).join('')+(list.length>MAX?'<div class="iss muted">… '+(list.length-MAX)+' autre(s) anomalie(s). Filtrez par « Lignes en anomalie » dans chaque onglet.</div>':'')+'</div>':'');
+  $('ctrl-out').onclick=e=>{const l=e.target.closest('.loc');if(!l)return;const x=list[+l.dataset.j];if(x.i==null)return;locate(x.kind,x.i,x.col)};
+}
+function locate(kind,i,col){
+  view[kind].q='';view[kind].f='';const idx=rowsFor(kind);view[kind].p=Math.floor(idx.indexOf(i)/PAGE);go(kind);
+  const inp=$('s-'+kind).querySelector('tr[data-i="'+i+'"] input[data-k="'+col+'"]')||$('s-'+kind).querySelector('tr[data-i="'+i+'"] input[data-k]');
+  if(inp){inp.scrollIntoView({block:'center',inline:'center'});inp.focus()}
+}
+
+/* ── Génération XML ── */
+function hi(x){return esc(x).replace(/(&lt;\/?)([A-Za-z]+)(&gt;)/g,'$1<span class="t">$2</span>$3')}
+function generate(){
+  const v=revalidate();
+  if(!st.etab.length){$('xml-banner').innerHTML='<div class="banner w">⚠ Aucune donnée à générer.</div>';return}
+  const r=E.buildXml(st); lastXml=r.xml;
+  let wf=true; try{const d=new DOMParser().parseFromString(r.xml,'application/xml');wf=!d.getElementsByTagName('parsererror').length}catch(_){}
+  const s=r.stats;
+  $('xml-banner').innerHTML=(!wf?'<div class="banner e">✕ XML mal formé — contactez le support.</div>':'')+
+    (v.errors?'<div class="banner e">✕ XML généré mais '+v.errors+' erreur(s) bloquante(s) subsistent : SIMPL risque de rejeter le dépôt. <a href="#" onclick="TL.go(\'ctrl\');return false">Voir les contrôles</a></div>'
+      :'<div class="banner ok">✓ XML EDI bien formé · UTF-8 sans BOM · structure DecElementImposableWrapper'+(v.warnings?' · '+v.warnings+' avertissement(s)':'')+'</div>');
+  $('xml-kpis').innerHTML=[['Établissements',s.etab,s.skipped?s.skipped+' ignoré(s) sans REF':'DecElementImposable'],['Terrains',s.terr,fmt(s.prixTerr)+' DH'],['Matériel',s.mat,fmt(s.prixMat)+' DH'],['Retraits',s.ret,'acq. '+fmt(s.prixRet)+' · cess. '+fmt(s.cession)]]
+    .map(([l,n,x])=>'<div class="kpi"><div class="l">'+l+'</div><div class="v">'+n.toLocaleString('fr-FR')+'</div><div class="s">'+esc(x)+'</div></div>').join('');
+  const lines=r.xml.split('\r\n'), MAXL=1500;
+  $('xml-pre').innerHTML=hi(lines.slice(0,MAXL).join('\n'))+(lines.length>MAXL?'\n\n<span style="color:#94a3b8">… aperçu limité à '+MAXL+' lignes sur '+lines.length.toLocaleString('fr-FR')+' — le fichier téléchargé est complet.</span>':'');
+  const bytes=new TextEncoder().encode(r.xml).length;
+  $('xml-info').textContent=lines.length.toLocaleString('fr-FR')+' lignes · '+(bytes/1024).toLocaleString('fr-FR',{maximumFractionDigits:1})+' Ko';
+  $('b-dl').disabled=false;$('b-cp').disabled=false;
+  toast('XML EDI généré.');
+}
+function fname(){let n=$('p-fname').value.trim()||'Declaration_DGI_Finale.xml';if(!/\.xml$/i.test(n))n+='.xml';return n}
+function download(){
+  if(!lastXml)generate(); if(!lastXml)return;
+  const blob=new Blob([new TextEncoder().encode(lastXml)],{type:'application/xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname();document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),30000);toast('Téléchargé : '+fname());
+}
+function copy(){if(!lastXml)return;(navigator.clipboard?navigator.clipboard.writeText(lastXml):Promise.reject()).then(()=>toast('XML copié.'),()=>toast('Copie impossible : utilisez le téléchargement.'))}
+
+/* ── Import ── */
+function pickFile(){$('file').value='';$('file').click()}
+$('file').addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0])});
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('ov')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('ov')}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)importFile(f)});
+async function importFile(file){
+  try{
+    if(st.etab.length+st.terr.length+st.mat.length+st.ret.length&&!confirm('Remplacer les données actuelles par « '+file.name+' » ?'))return;
+    let r;
+    if(/\.xml$/i.test(file.name)) r=E.readXml(await file.text(),DOMParser);
+    else{const X=await getXLSX();const wb=X.read(new Uint8Array(await file.arrayBuffer()),{type:'array',cellDates:false});r=E.readWorkbook(wb,X)}
+    st=r.state; for(const k in view){view[k]={q:'',p:0,f:''}}
+    changed();refreshLists();renderDecl();go('decl');
+    const v=val;
+    toast('Import « '+file.name+' » : '+st.etab.length+' établ., '+st.terr.length+' terr., '+st.mat.length+' mat., '+st.ret.length+' retr.'+(v.errors?' · '+v.errors+' erreur(s)':''),4500);
+  }catch(err){console.error(err);alert('Import impossible : '+(err.message||err))}
+}
+
+/* ── Export Excel (structure taxe_loc_xml) ── */
+async function exportExcel(blank){
+  try{
+    const X=await getXLSX(), wb=X.utils.book_new();
+    for(const [k,sc] of Object.entries(S)){
+      const aoa=[sc.cols.map(c=>c.h)];
+      if(!blank) st[k].forEach(o=>aoa.push(sc.cols.map(c=>{
+        const v=o[c.k]==null?'':String(o[c.k]);
+        if(c.t==='date'){const d=E.normDate(v);if(E.validISO(d)){const [y,m,dd]=d.split('-').map(Number);return {__d:(Date.UTC(y,m-1,dd)-Date.UTC(1899,11,30))/864e5}}return v}
+        if(c.t==='num'){const n=v.replace(/[\s ]/g,'').replace(',','.');return /^-?\d+(\.\d+)?$/.test(n)?Number(n):v}
+        if(['annee','depot','modif','nature','immat'].includes(c.k)&&/^\d+$/.test(v))return Number(v);
+        return v;
+      })));
+      /* dates écrites en n° de série Excel + format (pas d'objet Date : SheetJS peut provenir de la fenêtre parente) */
+      const dates=[];aoa.forEach((row,r)=>row.forEach((v,c)=>{if(v&&typeof v==='object'&&'__d' in v){dates.push([r,c,v.__d]);row[c]=null}}));
+      const ws=X.utils.aoa_to_sheet(aoa);
+      dates.forEach(([r,c,n])=>{ws[X.utils.encode_cell({r,c})]={t:'n',v:n,z:'yyyy-mm-dd'}});
+      ws['!cols']=sc.cols.map(c=>({wch:Math.max(12,Math.min(45,Math.round((c.w||110)/7)))}));
+      ws['!autofilter']={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(1,aoa.length-1),c:sc.cols.length-1}})};
+      X.utils.book_append_sheet(wb,ws,sc.sheet);
+    }
+    const codes=[['Liste','Codes'],...Object.entries(E.CODES).map(([id,v])=>[{'dl-natacq':'refNatureAcquision (Terrains B)','dl-statut':'refStatutPatrimonial','dl-desig':'refDesignationMat (Materiel B)','dl-etat':'refEtatAcquision (Materiel C)','dl-desret':'designationRetrait (Retraits B)','dl-natop':'natureOperationRetrait (Retraits C)'}[id],v.join(', ')]),['estImmatricule / modificative / depotDirect','0, 1'],['Liaison','Colonne A des onglets enfants = REF_INTERNE_LINK (Etablissements!K)']];
+    const wc=X.utils.aoa_to_sheet(codes);wc['!cols']=[{wch:42},{wch:70}];X.utils.book_append_sheet(wb,wc,'Codes');
+    const idf=(st.etab[0]&&st.etab[0].idf)||'';
+    X.writeFile(wb,blank?'taxe_loc_modele.xlsx':'taxe_loc_'+(idf?idf+'_':'')+((st.etab[0]&&st.etab[0].annee)||'')+'.xlsx',{compression:true});
+    toast(blank?'Modèle vierge téléchargé.':'Classeur exporté.');
+  }catch(err){alert('Export impossible : '+(err.message||err))}
+}
+function reset(){if(!confirm('Effacer toutes les données saisies dans l\'outil Taxes Locales ?'))return;st=E.emptyState();for(const k in view)view[k]={q:'',p:0,f:''};changed();refreshLists();renderDecl();toast('Données effacées.')}
+
+$('p-fname').addEventListener('input',save);
+Object.keys(S).forEach(bindGrid);
+window.TL={go,generate,download,copy,pickFile,exportExcel,genRefs,applyHeader,addEtab,reset,renderCtrl,_state:()=>st};
+load();counts();revalidate();refreshLists();renderStruct();renderDecl();
+})();
+</script>
+</body>
+</html>
